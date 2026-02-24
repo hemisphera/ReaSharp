@@ -10,4 +10,9 @@ public static class ReaperLogger
     Reaper.ShowConsoleMsg(msgData);
     Marshal.FreeHGlobal(msgData);
   }
+
+  public static void LogDebug(string s)
+  {
+    Log(s);
+  }
 }

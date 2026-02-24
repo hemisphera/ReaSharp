@@ -28,7 +28,8 @@ public sealed class MainLoop
 
   private void MidiCallback(MidiEvent me)
   {
-    //ReaperLogger.Log(me.ToString());
+    var dev = GlobalState.InputDevices.First(d => d.Id == me.DeviceIndex);
+    ReaperLogger.Log($"{dev}: {me}");
   }
 
   /*

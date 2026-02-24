@@ -27,6 +27,9 @@ public static class Plugin
 
       Reaper.LoadFunctions(info);
 
+      GlobalState.Initialize();
+      CommandRegistry.Initialize();
+      CommandRegistry.Register("REASHARP_ASD", "Huzah!", () => ReaperLogger.Log("Aight."));
       Loop = new MainLoop();
       ReaperLogger.Log("Hello from .NET 10 using AOT!\n");
 

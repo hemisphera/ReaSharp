@@ -1,4 +1,6 @@
-﻿namespace ReaSharp;
+﻿using System.Runtime.InteropServices;
+
+namespace ReaSharp;
 
 public static class ReaperApi
 {
