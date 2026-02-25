@@ -1,13 +1,11 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using ReaSharp.Models;
 
 namespace ReaSharp;
 
-/// <summary>
-/// Registers REAPER commands (gaccel) and dispatches execution via hookcommand.
-/// Must call <see cref="Initialize"/> once after <see cref="Reaper.LoadFunctions"/> before registering any commands.
-/// </summary>
-public static class CommandRegistry
+public class DefaultCommandRegistry : ICommandRegistry
 {
   private static readonly Dictionary<int, ReaperCommand> Commands = [];
 
@@ -15,24 +13,13 @@ public static class CommandRegistry
   private static readonly List<IntPtr> PinnedAllocations = [];
 
   /// <summary>
-  /// Registers the hookcommand callback with REAPER. Must be called once during plugin startup.
-  /// </summary>
-  public static unsafe void Initialize()
-  {
-    var hookPtr = (IntPtr)(delegate* unmanaged[Cdecl]<int, int, bool>)&HookCommand;
-    var hookName = Marshal.StringToHGlobalAnsi("hookcommand");
-    Reaper.Register(hookName, hookPtr);
-    Marshal.FreeHGlobal(hookName);
-  }
-
-  /// <summary>
   /// Registers a command with REAPER and returns the resulting <see cref="ReaperCommand"/>
   /// whose <see cref="ReaperCommand.Id"/> is assigned by REAPER.
   /// </summary>
   /// <param name="uniqueName">Stable, unique identifier for this command (e.g. "ReaSharp_MyAction"). Must not change between sessions.</param>
   /// <param name="description">Label shown in the REAPER Action List.</param>
-  /// <param name="execute">Callback invoked when the command is triggered.</param>
-  public static ReaperCommand Register(string uniqueName, string description, Action execute)
+  /// <param name="handler">Callback invoked when the command is triggered.</param>
+  public ReaperCommand Register(string uniqueName, string description, Func<Task> handler)
   {
     // Step 1: register the named command ID — return value IS the assigned command ID.
     var uniqueNamePtr = Marshal.StringToHGlobalAnsi(uniqueName);
@@ -72,24 +59,65 @@ public static class CommandRegistry
     {
       Id = commandId,
       Description = description,
-      Execute = execute
+      Handler = handler
     };
 
     Commands[commandId] = command;
     return command;
   }
 
-  /// <summary>
-  /// Called by REAPER for every command execution in the main section.
-  /// Returns true to indicate the command was handled (preventing further processing).
-  /// </summary>
-  [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-  private static bool HookCommand(int command, int flag)
+  public ReaperCommand? GetById(int command)
   {
-    if (!Commands.TryGetValue(command, out var cmd))
-      return false;
-
-    cmd.Execute();
-    return true;
+    return Commands.GetValueOrDefault(command);
   }
+
+  /*
+  public static async Task RunTest1()
+  {
+    var sw = Stopwatch.StartNew();
+    var tracks = Track.Enumerate().ToList();
+    sw.Stop();
+    ReaperLogger.LogDebug($"Enumerate tracks: {sw.Elapsed.TotalMilliseconds}ms");
+
+    var lastTrack = tracks.Last();
+
+    sw = Stopwatch.StartNew();
+    var isMuted = lastTrack.Mute;
+    sw.Stop();
+    ReaperLogger.LogDebug($"Reading mute: {sw.Elapsed.TotalMilliseconds}ms");
+
+    sw = Stopwatch.StartNew();
+    lastTrack.Mute = !isMuted;
+    ReaperLogger.LogDebug($"Toggle mute: {sw.Elapsed.TotalMilliseconds}ms");
+
+    sw = Stopwatch.StartNew();
+    lastTrack.Mute = !isMuted;
+    ReaperLogger.LogDebug($"Toggle same mute: {sw.Elapsed.TotalMilliseconds}ms");
+
+    sw = Stopwatch.StartNew();
+    foreach (var track in tracks)
+    {
+      track.Mute = true;
+    }
+
+    ReaperLogger.LogDebug($"Toggle mute on all: {sw.Elapsed.TotalMilliseconds}ms");
+  }
+
+  public static async Task RunTest2()
+  {
+    var tracks = Track.Enumerate();
+    int level = 0;
+    foreach (var track in tracks)
+    {
+      var msg = "".PadLeft(level) + track.Name;
+      level += track.FolderLevel;
+
+      ReaperLogger.Log(msg);
+      foreach (var item in track.EnumerateMediaItems())
+      {
+        ReaperLogger.Log($"{item.Index}");
+      }
+    }
+  }
+  */
 }
