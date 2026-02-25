@@ -24,10 +24,10 @@ public sealed class MidiDevice
       var buf = stackalloc byte[bufferSize];
       for (var i = 0; i < Reaper.GetNumMIDIInputs(); i++)
       {
-        if (!Reaper.GetMIDIInputName(i, buf, bufferSize)) continue;
+        if (!Reaper.GetMIDIInputName(i, (IntPtr)buf, bufferSize)) continue;
         var alias = Marshal.PtrToStringAnsi((IntPtr)buf) ?? string.Empty;
 
-        Reaper.GetMIDIInputNameNoAlias(i, buf, bufferSize);
+        Reaper.GetMIDIInputNameNoAlias(i, (IntPtr)buf, bufferSize);
         var name = Marshal.PtrToStringAnsi((IntPtr)buf) ?? string.Empty;
 
         resp.Add(new MidiDevice
@@ -52,10 +52,10 @@ public sealed class MidiDevice
       var buf = stackalloc byte[bufferSize];
       for (var i = 0; i < Reaper.GetNumMIDIOutputs(); i++)
       {
-        if (!Reaper.GetMIDIOutputName(i, buf, bufferSize)) continue;
+        if (!Reaper.GetMIDIOutputName(i, (IntPtr)buf, bufferSize)) continue;
         var alias = Marshal.PtrToStringAnsi((IntPtr)buf) ?? string.Empty;
 
-        Reaper.GetMIDIOutputNameNoAlias(i, buf, bufferSize);
+        Reaper.GetMIDIOutputNameNoAlias(i, (IntPtr)buf, bufferSize);
         var name = Marshal.PtrToStringAnsi((IntPtr)buf) ?? string.Empty;
 
         resp.Add(new MidiDevice
