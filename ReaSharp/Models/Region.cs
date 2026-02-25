@@ -61,4 +61,9 @@ public sealed class Region
   {
     return $"{Id}: {Name} [{Start} - {End}]";
   }
+
+  public bool IsActive(TimeSpan position)
+  {
+    return Start <= position && End >= position;
+  }
 }

@@ -10,11 +10,13 @@ public class Transport
   public bool IsRecording => (_playState & 0x04) == 0x04;
   public TimeSpan CursorPositoon { get; private set; }
   public TimeSpan PlayheadPosition { get; private set; }
+  public TimeSpan PlayheadOrCursorPosition => IsPlaying ? PlayheadPosition : CursorPositoon;
 
 
   public Transport(Project? project = null)
   {
     _project = project ?? Project.Default;
+    Update();
   }
 
 

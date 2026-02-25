@@ -4,13 +4,13 @@ namespace ReaSharp.Models;
 
 public sealed class Track
 {
-  public static IEnumerable<Track> Enumerate(IntPtr? project = null)
+  public static IEnumerable<Track> Enumerate(Project? project = null)
   {
-    var projectPtr = project ?? IntPtr.Zero;
+    project ??= Project.Default;
     List<Track> tracks = [];
     for (var i = 0; i < Reaper.GetNumTracks(); i++)
     {
-      tracks.Add(new Track(projectPtr, i));
+      tracks.Add(new Track(project.ReaperHandle, i));
     }
 
     return tracks;
@@ -18,11 +18,10 @@ public sealed class Track
 
 
   public IntPtr ReaperHandle { get; }
-  private readonly IntPtr _projectPtr;
 
   public int Index { get; }
   public Guid Id { get; }
-  public Lazy<string> Name { get; }
+  public string Name { get; }
 
   public bool Mute
   {
@@ -63,11 +62,10 @@ public sealed class Track
 
   private Track(IntPtr project, int index)
   {
-    _projectPtr = project;
-    ReaperHandle = Reaper.GetTrack(_projectPtr, index);
+    ReaperHandle = Reaper.GetTrack(project, index);
     Index = index;
     Id = Guid.TryParse(GetStringValue("GUID"), out var guid) ? guid : Guid.Empty;
-    Name = new Lazy<string>(() => GetStringValue("P_NAME") ?? string.Empty);
+    Name = GetStringValue("P_NAME") ?? string.Empty;
   }
 
 
@@ -135,6 +133,6 @@ public sealed class Track
 
   public override string ToString()
   {
-    return $"{Id}: {Name.Value}";
+    return $"{Id}: {Name}";
   }
 }
