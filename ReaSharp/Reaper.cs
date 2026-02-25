@@ -2153,6 +2153,7 @@ public delegate void ViewPrefsDelegate(int page, IntPtr pageByName);
 
 public static class Reaper
 {
+  public const int NeedBigBufferSize = 4096;
   public static GetFuncDelegate GetFunc { get; private set; } = null!;
   public static RegisterDelegate Register { get; set; } = null!;
 
@@ -2873,7 +2874,7 @@ public static class Reaper
   // </auto-generated-reaper-properties>
 
 
-  public static void LoadFunctions(ReaperPluginInfo pluginInfo)
+  internal static void LoadFunctions(ReaperPluginInfo pluginInfo)
   {
     GetFunc = Marshal.GetDelegateForFunctionPointer<GetFuncDelegate>(pluginInfo.GetFunc);
     Register = Marshal.GetDelegateForFunctionPointer<RegisterDelegate>(pluginInfo.Register);

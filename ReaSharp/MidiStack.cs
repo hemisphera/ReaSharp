@@ -1,4 +1,6 @@
-﻿namespace ReaSharp;
+﻿using ReaSharp.Models;
+
+namespace ReaSharp;
 
 public static class MidiStack
 {

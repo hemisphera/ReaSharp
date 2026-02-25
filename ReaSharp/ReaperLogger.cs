@@ -13,6 +13,11 @@ public static class ReaperLogger
 
   public static void LogDebug(string s)
   {
-    Log(s);
+    Log($"[DBG]: {s}");
+  }
+
+  public static void LogError(Exception ex)
+  {
+    Log($"[ERR]: {ex.Message}");
   }
 }

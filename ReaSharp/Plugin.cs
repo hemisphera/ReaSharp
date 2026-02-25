@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using ReaSharp.Models;
 
 namespace ReaSharp;
 
@@ -29,9 +30,10 @@ public static class Plugin
 
       GlobalState.Initialize();
       CommandRegistry.Initialize();
-      CommandRegistry.Register("REASHARP_ASD", "Huzah!", () => ReaperLogger.Log("Aight."));
-      Loop = new MainLoop();
-      ReaperLogger.Log("Hello from .NET 10 using AOT!\n");
+      CommandRegistry.Register("REASHARP_TEST1", "ReaSharp: Test 1", () => _ = CommandRegistry.RunTest1());
+      CommandRegistry.Register("REASHARP_TEST2", "ReaSharp: Test 2", () => _ = CommandRegistry.RunTest2());
+
+      ReaperLogger.Log($"REAPER version: {info.CallerVersion}");
 
       return 1; // success
     }

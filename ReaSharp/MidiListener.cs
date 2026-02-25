@@ -1,4 +1,6 @@
-﻿namespace ReaSharp;
+﻿using ReaSharp.Models;
+
+namespace ReaSharp;
 
 public sealed class MidiListener : IDisposable
 {

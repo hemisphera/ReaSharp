@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ReaSharp;
+namespace ReaSharp.Models;
 
 public sealed class MidiDevice
 {
