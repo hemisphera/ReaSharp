@@ -4,7 +4,7 @@
 
 - Create a new .NET10 class library project like this:
 
-    ````
+    ```xml
     ...
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -20,10 +20,10 @@
         <NativeLib>Shared</NativeLib>
     </PropertyGroup>
     ...
-    ````
+    ```
 - Reference `ReaSharp` as project or NuGet package
 - Create a static class `Plugin` (or whatever) as the entry point:
-  ````
+  ```cs
   [UnmanagedCallersOnly(EntryPoint = "ReaperPluginEntry")]
   public static int ReaperPluginEntry(IntPtr hInstance, IntPtr rec)
   {
@@ -45,7 +45,7 @@
       return 0;
     }
   }
-  ````
+  ```
 - Publish your project using something like `dotnet publish -r win-x64 -c Release`
 - Copy the file to `%APPDATA%\REAPER\UserPlugins`
 - Enjoy
