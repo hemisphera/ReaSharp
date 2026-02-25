@@ -1,0 +1,64 @@
+﻿using System.Runtime.InteropServices;
+
+namespace ReaSharp.Models;
+
+public class Project
+{
+  public static readonly Project Default = new(IntPtr.Zero);
+  public static Project? Current => GetProjectByIndex(-1);
+  public static Project? CurrentlyRendering => GetProjectByIndex(0x40000000);
+
+  public static Project? GetProjectByIndex(int index)
+  {
+    const int bufSize = 4096;
+    var filename = Marshal.AllocHGlobal(bufSize);
+    try
+    {
+      var prj = Reaper.EnumProjects(index, filename, bufSize);
+      if (prj == IntPtr.Zero) return null;
+      return new Project(prj)
+      {
+        Index = index,
+        Filename = Marshal.PtrToStringAnsi(filename)
+      };
+    }
+    finally
+    {
+      Marshal.FreeHGlobal(filename);
+    }
+  }
+
+  public static IEnumerable<Project> Enumerate()
+  {
+    List<Project> projects = [];
+    var ci = -1;
+    while (true)
+    {
+      ci++;
+      var prj = GetProjectByIndex(ci);
+      if (prj == null) break;
+      projects.Add(prj);
+    }
+
+    return projects;
+  }
+
+
+  public IntPtr ReaperHandle { get; }
+
+  public int Index { get; init; } = -1;
+
+  public string? Filename { get; init; }
+
+
+  private Project(IntPtr handle)
+  {
+    ReaperHandle = handle;
+  }
+
+
+  public override string ToString()
+  {
+    return $"{Index}: {Filename}";
+  }
+}

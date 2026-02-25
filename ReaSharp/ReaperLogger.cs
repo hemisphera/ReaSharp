@@ -13,6 +13,7 @@ public static class ReaperLogger
 
   public static void LogDebug(string s)
   {
+    return;
     Log($"[DBG]: {s}");
   }
 
