@@ -57,6 +57,21 @@ public class Project
   }
 
 
+  public int InvokeCommand(int id)
+  {
+    Reaper.Main_OnCommandEx(id, 0, ReaperHandle);
+    return id;
+  }
+
+  public int InvokeCommand(string id)
+  {
+    var handle = Marshal.StringToHGlobalAnsi(id);
+    var resp = Reaper.NamedCommandLookup(handle);
+    Marshal.FreeHGlobal(handle);
+    return resp > 0 ? InvokeCommand(resp) : -1;
+  }
+
+
   public override string ToString()
   {
     return $"{Index}: {Filename}";

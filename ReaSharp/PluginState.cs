@@ -1,5 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace ReaSharp;
 
@@ -9,8 +12,9 @@ public class PluginState
 
   public static PluginState Instance => _instance ?? throw new Exception("Plugin state not initialized.");
 
-
   public ICommandRegistry? Commands { get; private set; }
+  public IHost Host { get; }
+  public ILogger Logger { get; }
 
 
   public static PluginState Initialize(ReaperPluginInfo pluginInfo)
@@ -23,6 +27,14 @@ public class PluginState
   private PluginState(ReaperPluginInfo pluginInfo)
   {
     Reaper.LoadFunctions(pluginInfo);
+    var hb = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder()
+      .ConfigureLogging(logging =>
+      {
+        logging.ClearProviders();
+        logging.AddProvider(new PluginLogProvider());
+      });
+    Host = hb.Build();
+    Logger = Host.Services.GetRequiredService<ILogger<PluginState>>();
   }
 
 
@@ -49,10 +61,10 @@ public class PluginState
   [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
   private static bool HookCommand(int command, int flag)
   {
-    ReaperLogger.LogDebug($"Finding command {command}");
+    Instance.Logger.LogDebug($"Finding command {command}");
     var cmd = Instance.Commands?.GetById(command);
     if (cmd == null) return false;
-    ReaperLogger.LogDebug("Found. Running.");
+    Instance.Logger.LogDebug("Found. Running.");
     cmd.Execute();
     return true;
   }

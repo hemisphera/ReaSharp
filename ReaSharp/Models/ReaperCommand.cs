@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace ReaSharp.Models;
 
 /// <summary>Represents a REAPER command registered via gaccel_register and visible in the Action List.</summary>
@@ -22,7 +24,7 @@ public sealed class ReaperCommand
       }
       catch (Exception e)
       {
-        ReaperLogger.LogError(e);
+        PluginState.Instance.Logger.LogError(e, "Command execution failed.");
       }
     });
   }
