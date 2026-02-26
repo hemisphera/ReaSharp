@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.Logging;
 using ReaSharp.Models;
 
 namespace ReaSharp;
@@ -27,7 +26,7 @@ public class DefaultCommandRegistry : ICommandRegistry
     var commandId = Reaper.Register(cmdIdName, uniqueNamePtr);
     Marshal.FreeHGlobal(cmdIdName);
 
-    PluginState.Instance.Logger.LogDebug("Registered command ID {commandId}", commandId);
+    ReaperLogger.LogDebug($"Registered command ID {commandId}");
 
     if (commandId == 0)
       throw new Exception($"REAPER returned command ID 0 for '{uniqueName}'. Check that the name is unique.");
