@@ -5,17 +5,20 @@ namespace Hsp.Zulbert;
 
 public static class Plugin
 {
+  public static ZulState State { get; private set; } = null!;
+
   [UnmanagedCallersOnly(EntryPoint = "ReaperPluginEntry")]
   public static int ReaperPluginEntry(IntPtr hInstance, IntPtr rec)
   {
     try
     {
-      PluginState.Initialize(ReaperPluginInfo.FromPointer(rec));
-      var cr = PluginState.Instance.AddCommandRegistry(new DefaultCommandRegistry());
+      var state = PluginState.Initialize(ReaperPluginInfo.FromPointer(rec));
+      var cr = state.AddCommandRegistry(new DefaultCommandRegistry());
+      cr.Register("ZULBERT_PLAY", "Zulbert: Play", () => _ = Commands.Play());
+      cr.Register("ZULBERT_WATCH", "Zulbert: Watch", () => _ = Commands.Watch());
+      state.Gmem.Connect("RPLT_MEM");
 
-      ReaperLogger.Log("Zulbert is dere, mon!");
-      cr.Register("REASHARP_TEST1", "ReaSharp: Test 1", () => _ = Commands.RunTest1());
-      cr.Register("REASHARP_TEST2", "ReaSharp: Test 2", () => _ = Commands.RunTest2());
+      ReaperLogger.LogInformation("Initialized");
 
       return 1;
     }
