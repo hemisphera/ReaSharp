@@ -5,7 +5,7 @@ namespace ReaSharp.Models;
 public class Project
 {
   public static readonly Project Default = new(IntPtr.Zero);
-  public static Project? Current => GetProjectByIndex(-1);
+  public static Project Current => GetProjectByIndex(-1) ?? throw new Exception("Unable to get current project");
   public static Project? CurrentlyRendering => GetProjectByIndex(0x40000000);
 
   public static Project? GetProjectByIndex(int index)
@@ -26,6 +26,11 @@ public class Project
     {
       Marshal.FreeHGlobal(filename);
     }
+  }
+
+  public static Project FromHandle(IntPtr handle)
+  {
+    return new Project(handle);
   }
 
   public static IEnumerable<Project> Enumerate()
@@ -54,6 +59,20 @@ public class Project
   private Project(IntPtr handle)
   {
     ReaperHandle = handle;
+  }
+
+
+  public List<Track> GetSelectedTracks()
+  {
+    var tracks = new List<Track>();
+    var count = Reaper.CountSelectedTracks2(ReaperHandle, false);
+    for (var i = 0; i < count; i++)
+    {
+      var trackHandle = Reaper.GetSelectedTrack2(ReaperHandle, i, false);
+      tracks.Add(Track.FromHandle(trackHandle));
+    }
+
+    return tracks;
   }
 
 

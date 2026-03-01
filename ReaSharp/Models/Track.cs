@@ -10,18 +10,35 @@ public sealed class Track
     List<Track> tracks = [];
     for (var i = 0; i < Reaper.GetNumTracks(); i++)
     {
-      tracks.Add(new Track(project.ReaperHandle, i));
+      tracks.Add(FromIndex(i, project));
     }
 
     return tracks;
   }
 
+  public static Track FromIndex(int index, Project? project = null)
+  {
+    project ??= Project.Default;
+    var handle = Reaper.GetTrack(project.ReaperHandle, index);
+    return FromHandle(handle);
+  }
+
+  public static Track FromHandle(IntPtr handle)
+  {
+    return new Track(handle);
+  }
+
 
   public IntPtr ReaperHandle { get; }
-
+  public Project Project => Project.FromHandle((IntPtr)GetValue("P_PROJECT"));
   public int Index { get; }
   public Guid Id { get; }
-  public string Name { get; }
+
+  public string Name
+  {
+    get => GetStringValue("P_NAME") ?? string.Empty;
+    set => SetStringValue("P_NAME", value);
+  }
 
   public bool Mute
   {
@@ -60,12 +77,11 @@ public sealed class Track
   }
 
 
-  private Track(IntPtr project, int index)
+  private Track(IntPtr trackHandle)
   {
-    ReaperHandle = Reaper.GetTrack(project, index);
-    Index = index;
+    ReaperHandle = trackHandle;
+    Index = (int)GetValue("IP_TRACKNUMBER");
     Id = Guid.TryParse(GetStringValue("GUID"), out var guid) ? guid : Guid.Empty;
-    Name = GetStringValue("P_NAME") ?? string.Empty;
   }
 
 
@@ -83,6 +99,21 @@ public sealed class Track
     {
       Marshal.FreeHGlobal(ptr);
       Marshal.FreeHGlobal(value);
+    }
+  }
+
+  private void SetStringValue(string paramName, string? value)
+  {
+    var ptr = Marshal.StringToHGlobalAnsi(paramName);
+    var ptrValue = Marshal.StringToHGlobalAnsi(value);
+    try
+    {
+      Reaper.GetSetMediaTrackInfo_String(ReaperHandle, ptr, ptrValue, true);
+    }
+    finally
+    {
+      Marshal.FreeHGlobal(ptr);
+      Marshal.FreeHGlobal(ptrValue);
     }
   }
 
@@ -121,14 +152,29 @@ public sealed class Track
 
   public IEnumerable<TrackMediaItem> EnumerateMediaItems()
   {
-    var track = Reaper.GetTrack(GetProjectPointer(), Index);
+    var track = Reaper.GetTrack(Project.ReaperHandle, Index);
     var itemCount = Reaper.CountTrackMediaItems(track);
-    return Enumerable.Range(0, itemCount).Select(i => new TrackMediaItem(this, i));
+    return Enumerable.Range(0, itemCount).Select(i => TrackMediaItem.FromByTrackIndex(this, i));
   }
 
-  public IntPtr GetProjectPointer()
+  public TrackMediaItem CreateEmptyItem(TimeSpan? position = null, TimeSpan? length = null)
   {
-    return (IntPtr)GetValue("P_PROJECT");
+    var handle = Reaper.AddMediaItemToTrack(ReaperHandle);
+    ReaperLogger.LogDebug($"Created media item {handle}");
+    var item = TrackMediaItem.FromHandle(handle);
+    item.Position = position ?? TimeSpan.FromSeconds(0);
+    item.Length = length ?? TimeSpan.FromSeconds(1);
+    return item;
+  }
+
+  public TrackMediaItem CreateMidiItem(TimeSpan? position = null, TimeSpan? length = null)
+  {
+    var handle = Reaper.CreateNewMIDIItemInProj(
+      ReaperHandle,
+      (position ?? TimeSpan.FromSeconds(0)).TotalSeconds,
+      (length ?? TimeSpan.FromSeconds(1)).TotalSeconds,
+      IntPtr.Zero);
+    return TrackMediaItem.FromHandle(handle);
   }
 
   public override string ToString()

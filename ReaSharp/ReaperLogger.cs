@@ -11,6 +11,13 @@ public static class ReaperLogger
     Marshal.FreeHGlobal(msgData);
   }
 
+  public static void ClearLog()
+  {
+    var msgData = Marshal.StringToHGlobalAnsi(string.Empty);
+    Reaper.ShowConsoleMsg(msgData);
+    Marshal.FreeHGlobal(msgData);
+  }
+
   public static void LogInformation(string s)
   {
     Log("[INFO]", s);

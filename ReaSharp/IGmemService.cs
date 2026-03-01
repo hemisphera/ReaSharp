@@ -41,4 +41,12 @@ public interface IGmemService
   {
     WriteInt32(index, Convert.ToInt32(value));
   }
+
+  public int Increment(int index, int value = 1)
+  {
+    var current = ReadInt32(index);
+    var newValue = current + value;
+    WriteInt32(index, newValue);
+    return newValue;
+  }
 }
