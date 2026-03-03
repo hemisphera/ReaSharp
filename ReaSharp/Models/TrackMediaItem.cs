@@ -46,8 +46,8 @@ public sealed class TrackMediaItem
 
   public bool Selected
   {
-    get => GetValue("I_SELECTED") != 0;
-    set => SetValue("I_SELECTED", value ? 1 : 0);
+    get => GetValue("B_UISEL") != 0;
+    set => SetValue("B_UISEL", value ? 1 : 0);
   }
 
   public TimeSpan Length
@@ -129,5 +129,10 @@ public sealed class TrackMediaItem
     }
 
     Selected = true;
+  }
+
+  public override string ToString()
+  {
+    return $"{ReaperHandle} ({Position} - {Position + Length})";
   }
 }

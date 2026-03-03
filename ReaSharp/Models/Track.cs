@@ -169,10 +169,11 @@ public sealed class Track
 
   public TrackMediaItem CreateMidiItem(TimeSpan? position = null, TimeSpan? length = null)
   {
+    length ??= TimeSpan.FromSeconds(1);
+    position ??= TimeSpan.FromSeconds(0);
     var handle = Reaper.CreateNewMIDIItemInProj(
       ReaperHandle,
-      (position ?? TimeSpan.FromSeconds(0)).TotalSeconds,
-      (length ?? TimeSpan.FromSeconds(1)).TotalSeconds,
+      position.Value.TotalSeconds, (position + length).Value.TotalSeconds,
       IntPtr.Zero);
     return TrackMediaItem.FromHandle(handle);
   }
