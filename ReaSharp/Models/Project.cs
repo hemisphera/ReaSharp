@@ -121,6 +121,24 @@ public class Project
     Reaper.Main_OnCommandEx(40031, 0, ReaperHandle);
   }
 
+  public void BeginUndoBlock()
+  {
+    Reaper.Undo_BeginBlock2(ReaperHandle);
+  }
+
+  public void EndUndoBlock(string description)
+  {
+    var str = Marshal.StringToHGlobalAnsi(description);
+    Reaper.Undo_EndBlock2(ReaperHandle, str, -1);
+    Marshal.FreeHGlobal(str);
+  }
+
+  public void ZoomTo(IArrangeItem item)
+  {
+    SetSelection(item);
+    ZoomToTimeSelection();
+    ClearSelection();
+  }
 
   public override string ToString()
   {

@@ -55,6 +55,11 @@ public class Transport
     FireEvents(wasRecording, wasPlaying);
   }
 
+  public void ToggleRecord()
+  {
+    Reaper.Main_OnCommandEx(1013, 0, Project.ReaperHandle);
+  }
+
   private void FireEvents(bool wasRecording, bool wasPlaying)
   {
     if (wasRecording != IsRecording)

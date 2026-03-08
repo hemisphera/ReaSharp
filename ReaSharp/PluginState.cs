@@ -2,41 +2,33 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace ReaSharp;
 
 public class PluginState
 {
   private static PluginState? _instance;
-  private static ReaperSynchronizationContext? _syncContext;
+
+  //private static ReaperSynchronizationContext? _syncContext;
   private readonly IHost _host;
 
   public static PluginState Instance => _instance ?? throw new Exception("Plugin state not initialized.");
-  public static ReaperSynchronizationContext SyncContext => _syncContext ?? throw new Exception("Plugin state not initialized.");
+  //public static ReaperSynchronizationContext SyncContext => _syncContext ?? throw new Exception("Plugin state not initialized.");
 
   public ICommandRegistry? Commands => Services.GetService<ICommandRegistry>();
   public IServiceProvider Services => _host.Services;
 
 
-  public static PluginState Initialize(
-    ReaperPluginInfo pluginInfo,
-    Action<HostBuilderContext, IServiceCollection>? servicesCallback = null,
-    Action<HostBuilderContext, ILoggingBuilder>? loggingCallback = null)
+  public static PluginState Initialize(ReaperPluginInfo pluginInfo, IHost host)
   {
     // Establish the main-thread SynchronizationContext before building the host so that
     // any async continuations awaited from plugin code are marshaled back here.
-    _syncContext = new ReaperSynchronizationContext();
-    SynchronizationContext.SetSynchronizationContext(_syncContext);
+    //_syncContext = new ReaperSynchronizationContext();
+    //SynchronizationContext.SetSynchronizationContext(_syncContext);
 
-    var hostBuilder = Host.CreateDefaultBuilder();
-    if (servicesCallback != null)
-      hostBuilder.ConfigureServices(servicesCallback);
-    if (loggingCallback != null)
-      hostBuilder.ConfigureLogging(loggingCallback);
-    _instance = new PluginState(pluginInfo, hostBuilder.Build());
+    _instance = new PluginState(pluginInfo, host);
     ConfigureHookCommand();
-    ConfigureTimer();
+    //ConfigureTimer();
     return _instance;
   }
 
@@ -61,6 +53,7 @@ public class PluginState
     }
   }
 
+  /*
   private static void ConfigureTimer()
   {
     unsafe
@@ -77,6 +70,7 @@ public class PluginState
   {
     _syncContext?.ProcessQueue();
   }
+  */
 
   /// <summary>
   /// Called by REAPER for every command execution in the main section.

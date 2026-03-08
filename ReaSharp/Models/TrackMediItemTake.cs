@@ -56,6 +56,30 @@ public sealed class TrackMediItemTake
     }
   }
 
+  public byte[]? GetAllMidiEvents()
+  {
+    var buffer = new byte[1024 * 1024];
+    unsafe
+    {
+      fixed (byte* ptr = buffer)
+      {
+        var bufferSize = buffer.Length;
+        var ok = Reaper.MIDI_GetAllEvts(ReaperHandle, (IntPtr)ptr, (IntPtr)(&bufferSize));
+        return ok ? buffer[..bufferSize] : null;
+      }
+    }
+  }
+
+  public bool SetAllMidiEvents(byte[] data)
+  {
+    unsafe
+    {
+      fixed (byte* ptr = data)
+      {
+        return Reaper.MIDI_SetAllEvts(ReaperHandle, (nint)ptr, data.Length);
+      }
+    }
+  }
 
   public void AddMidiEvent()
   {
