@@ -2,7 +2,7 @@
 
 namespace ReaSharp.Models;
 
-public sealed class TrackMediaItem
+public sealed class TrackMediaItem : IArrangeItem
 {
   public static TrackMediaItem FromHandle(IntPtr handle)
   {
@@ -56,13 +56,13 @@ public sealed class TrackMediaItem
     set => SetValue("D_LENGTH", value.TotalSeconds);
   }
 
-  public TimeSpan Position
+  public TimeSpan Start
   {
     get => TimeSpan.FromSeconds(GetValue("D_POSITION"));
     set => SetValue("D_POSITION", value.TotalSeconds);
   }
 
-  public TimeSpan End => Position + Length;
+  public TimeSpan End => Start + Length;
 
   public IntPtr ReaperHandle { get; }
 
@@ -135,6 +135,6 @@ public sealed class TrackMediaItem
 
   public override string ToString()
   {
-    return $"{ReaperHandle} ({Position} - {Position + Length})";
+    return $"{ReaperHandle} ({Start} - {Start + Length})";
   }
 }

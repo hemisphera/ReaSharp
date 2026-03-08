@@ -2,7 +2,7 @@
 
 namespace ReaSharp.Models;
 
-public sealed class Region
+public sealed class Region : IArrangeItem
 {
   public required int Id { get; init; }
   public required string Name { get; init; }

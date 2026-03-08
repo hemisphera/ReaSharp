@@ -21,7 +21,17 @@ public class ReaperConsoleLogger : ILogger
 
   public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
   {
-    WriteLog(formatter(state, exception));
+    var prefix = logLevel switch
+    {
+      LogLevel.Trace => "[TRC]",
+      LogLevel.Debug => "[DBG]",
+      LogLevel.Warning => "[WRN]",
+      LogLevel.Error => "[ERR]",
+      LogLevel.Critical => "[CRT]",
+      _ => "[INF]"
+    };
+
+    WriteLog(prefix + " " + formatter(state, exception));
   }
 
   public bool IsEnabled(LogLevel logLevel)

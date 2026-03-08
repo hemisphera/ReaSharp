@@ -95,25 +95,30 @@ public class Project
     SetSelection(TimeSpan.Zero, TimeSpan.Zero);
   }
 
-  public void SetSelection(TimeSpan start, TimeSpan length)
+  public void SetSelection(TimeSpan start, TimeSpan end)
   {
     unsafe
     {
       var startVal = start.TotalSeconds;
-      var endVal = (start + length).TotalSeconds;
+      var endVal = end.TotalSeconds;
       Reaper.GetSet_LoopTimeRange2(ReaperHandle, true, false, (IntPtr)(&startVal), (IntPtr)(&endVal), false);
     }
   }
 
-  public void SetSelection(TrackMediaItem item)
+  public void SetSelection(IArrangeItem ai)
   {
-    SetSelection(item.Position, item.Length);
+    SetSelection(ai.Start, ai.End);
   }
 
 
   public void StartStopRecordingAtNextMeasure()
   {
     Reaper.Main_OnCommandEx(40003, 0, ReaperHandle);
+  }
+
+  public void ZoomToTimeSelection()
+  {
+    Reaper.Main_OnCommandEx(40031, 0, ReaperHandle);
   }
 
 

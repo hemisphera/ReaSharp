@@ -162,7 +162,7 @@ public sealed class Track
     var handle = Reaper.AddMediaItemToTrack(ReaperHandle);
     //ReaperLogger.LogDebug($"Created media item {handle}");
     var item = TrackMediaItem.FromHandle(handle);
-    item.Position = position ?? TimeSpan.FromSeconds(0);
+    item.Start = position ?? TimeSpan.FromSeconds(0);
     item.Length = length ?? TimeSpan.FromSeconds(1);
     return item;
   }
