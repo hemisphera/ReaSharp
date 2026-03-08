@@ -9,9 +9,11 @@ namespace ReaSharp;
 public class PluginState
 {
   private static PluginState? _instance;
+  private static ReaperSynchronizationContext? _syncContext;
   private readonly IHost _host;
 
   public static PluginState Instance => _instance ?? throw new Exception("Plugin state not initialized.");
+  public static ReaperSynchronizationContext SyncContext => _syncContext ?? throw new Exception("Plugin state not initialized.");
 
   public ICommandRegistry? Commands => Services.GetService<ICommandRegistry>();
   public IServiceProvider Services => _host.Services;
@@ -22,6 +24,11 @@ public class PluginState
     Action<HostBuilderContext, IServiceCollection>? servicesCallback = null,
     Action<HostBuilderContext, ILoggingBuilder>? loggingCallback = null)
   {
+    // Establish the main-thread SynchronizationContext before building the host so that
+    // any async continuations awaited from plugin code are marshaled back here.
+    _syncContext = new ReaperSynchronizationContext();
+    SynchronizationContext.SetSynchronizationContext(_syncContext);
+
     var hostBuilder = Host.CreateDefaultBuilder();
     if (servicesCallback != null)
       hostBuilder.ConfigureServices(servicesCallback);
@@ -29,6 +36,7 @@ public class PluginState
       hostBuilder.ConfigureLogging(loggingCallback);
     _instance = new PluginState(pluginInfo, hostBuilder.Build());
     ConfigureHookCommand();
+    ConfigureTimer();
     return _instance;
   }
 
@@ -51,6 +59,23 @@ public class PluginState
       Reaper.Register(hookName, hookPtr);
       Marshal.FreeHGlobal(hookName);
     }
+  }
+
+  private static void ConfigureTimer()
+  {
+    unsafe
+    {
+      var timerPtr = (IntPtr)(delegate* unmanaged[Cdecl]<void>)&TimerCallback;
+      var timerName = Marshal.StringToHGlobalAnsi("timer");
+      Reaper.Register(timerName, timerPtr);
+      Marshal.FreeHGlobal(timerName);
+    }
+  }
+
+  [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+  private static void TimerCallback()
+  {
+    _syncContext?.ProcessQueue();
   }
 
   /// <summary>
