@@ -90,6 +90,32 @@ public class Project
     return resp > 0 ? InvokeCommand(resp) : -1;
   }
 
+  public void ClearSelection()
+  {
+    SetSelection(TimeSpan.Zero, TimeSpan.Zero);
+  }
+
+  public void SetSelection(TimeSpan start, TimeSpan length)
+  {
+    unsafe
+    {
+      var startVal = start.TotalSeconds;
+      var endVal = (start + length).TotalSeconds;
+      Reaper.GetSet_LoopTimeRange2(ReaperHandle, true, false, (IntPtr)(&startVal), (IntPtr)(&endVal), false);
+    }
+  }
+
+  public void SetSelection(TrackMediaItem item)
+  {
+    SetSelection(item.Position, item.Length);
+  }
+
+
+  public void StartStopRecordingAtNextMeasure()
+  {
+    Reaper.Main_OnCommandEx(40003, 0, ReaperHandle);
+  }
+
 
   public override string ToString()
   {

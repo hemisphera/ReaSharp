@@ -1,14 +1,21 @@
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
 using ReaSharp.Models;
 
 namespace ReaSharp;
 
 public class DefaultCommandRegistry : ICommandRegistry
 {
+  private readonly ILogger<DefaultCommandRegistry> _logger;
   private static readonly Dictionary<int, ReaperCommand> Commands = [];
 
   // Unmanaged memory that must outlive the plugin — never freed.
   private static readonly List<IntPtr> PinnedAllocations = [];
+
+  public DefaultCommandRegistry(ILogger<DefaultCommandRegistry> logger)
+  {
+    _logger = logger;
+  }
 
   /// <summary>
   /// Registers a command with REAPER and returns the resulting <see cref="ReaperCommand"/>
@@ -26,7 +33,7 @@ public class DefaultCommandRegistry : ICommandRegistry
     var commandId = Reaper.Register(cmdIdName, uniqueNamePtr);
     Marshal.FreeHGlobal(cmdIdName);
 
-    ReaperLogger.LogDebug($"Registered command ID {commandId}");
+    _logger.LogDebug("Registered command ID {commandId}", commandId);
 
     if (commandId == 0)
       throw new Exception($"REAPER returned command ID 0 for '{uniqueName}'. Check that the name is unique.");

@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 namespace ReaSharp.Models;
 
 /// <summary>Represents a REAPER command registered via gaccel_register and visible in the Action List.</summary>
@@ -12,17 +15,18 @@ public sealed class ReaperCommand
   public required Func<Task> Handler { get; init; }
 
 
-  public void Execute()
+  public void Execute(IServiceProvider services)
   {
     _ = Task.Run(async () =>
     {
+      var logger = services.GetService<ILogger<ReaperCommand>>();
       try
       {
         await Handler();
       }
-      catch (Exception e)
+      catch (Exception exception)
       {
-        ReaperLogger.LogError($"Command execution failed: {e.Message}");
+        logger?.LogError(exception, "Command execution failed.");
       }
     });
   }

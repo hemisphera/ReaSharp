@@ -1,37 +1,49 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace ReaSharp;
 
 public class PluginState
 {
   private static PluginState? _instance;
+  private readonly IHost _host;
 
   public static PluginState Instance => _instance ?? throw new Exception("Plugin state not initialized.");
 
-  public ICommandRegistry? Commands { get; private set; }
-  public IGmemService Gmem { get; }
+  public ICommandRegistry? Commands => Services.GetService<ICommandRegistry>();
+  public IServiceProvider Services => _host.Services;
 
 
-  public static PluginState Initialize(ReaperPluginInfo pluginInfo)
+  public static PluginState Initialize(
+    ReaperPluginInfo pluginInfo,
+    Action<HostBuilderContext, IServiceCollection>? servicesCallback = null,
+    Action<HostBuilderContext, ILoggingBuilder>? loggingCallback = null)
   {
-    _instance = new PluginState(pluginInfo);
+    var hostBuilder = Host.CreateDefaultBuilder();
+    if (servicesCallback != null)
+      hostBuilder.ConfigureServices(servicesCallback);
+    if (loggingCallback != null)
+      hostBuilder.ConfigureLogging(loggingCallback);
+    _instance = new PluginState(pluginInfo, hostBuilder.Build());
+    ConfigureHookCommand();
     return _instance;
   }
 
 
-  private PluginState(ReaperPluginInfo pluginInfo)
+  private PluginState(ReaperPluginInfo pluginInfo, IHost host)
   {
+    _host = host;
     Reaper.LoadFunctions(pluginInfo);
-    Gmem = new GmemService();
+    _host.Start();
+    ReaperConsoleLogger.WriteLog("Plugin initialized.");
   }
 
 
-  public ICommandRegistry AddCommandRegistry(ICommandRegistry reg)
+  private static void ConfigureHookCommand()
   {
-    if (Commands != null) throw new Exception("Command registry has already been set");
-    Commands = reg;
-
     unsafe
     {
       var hookPtr = (IntPtr)(delegate* unmanaged[Cdecl]<int, int, bool>)&HookCommand;
@@ -39,8 +51,6 @@ public class PluginState
       Reaper.Register(hookName, hookPtr);
       Marshal.FreeHGlobal(hookName);
     }
-
-    return reg;
   }
 
   /// <summary>
@@ -52,7 +62,7 @@ public class PluginState
   {
     var cmd = Instance.Commands?.GetById(command);
     if (cmd == null) return false;
-    cmd.Execute();
+    cmd.Execute(Instance.Services);
     return true;
   }
 }

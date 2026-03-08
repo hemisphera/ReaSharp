@@ -60,6 +60,5 @@ public sealed class TrackMediItemTake
   public void AddMidiEvent()
   {
     Reaper.MIDI_InsertNote(ReaperHandle, false, false, 0, 10, 1, 100, 100, IntPtr.Zero);
-    ReaperLogger.LogDebug("Added MIDI event to take.");
   }
 }

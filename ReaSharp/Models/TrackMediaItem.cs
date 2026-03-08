@@ -62,6 +62,8 @@ public sealed class TrackMediaItem
     set => SetValue("D_POSITION", value.TotalSeconds);
   }
 
+  public TimeSpan End => Position + Length;
+
   public IntPtr ReaperHandle { get; }
 
 
