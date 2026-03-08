@@ -38,7 +38,6 @@ public class PluginState
     _host = host;
     Reaper.LoadFunctions(pluginInfo);
     _host.Start();
-    ReaperConsoleLogger.WriteLog("Plugin initialized.");
   }
 
 

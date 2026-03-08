@@ -152,8 +152,7 @@ public sealed class Track
 
   public IEnumerable<TrackMediaItem> EnumerateMediaItems()
   {
-    var track = Reaper.GetTrack(Project.ReaperHandle, Index);
-    var itemCount = Reaper.CountTrackMediaItems(track);
+    var itemCount = Reaper.CountTrackMediaItems(ReaperHandle);
     return Enumerable.Range(0, itemCount).Select(i => TrackMediaItem.FromByTrackIndex(this, i));
   }
 
