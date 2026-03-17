@@ -46,6 +46,12 @@ public sealed class Track
     set => SetValue("B_MUTE", value ? 1.0 : 0.0);
   }
 
+  public RecordingMode RecordingMode
+  {
+    get => (RecordingMode)GetValue("I_RECMODE");
+    set => SetValue("I_RECMODE", (int)RecordingMode);
+  }
+
   public TrackSoloState Solo
   {
     get => (TrackSoloState)(int)GetValue("I_SOLO");
@@ -156,6 +162,18 @@ public sealed class Track
     return Enumerable.Range(0, itemCount).Select(i => TrackMediaItem.FromByTrackIndex(this, i));
   }
 
+  public IEnumerable<TrackFx> EnumerateFx()
+  {
+    return TrackFx.Enumerate(this);
+  }
+
+  public IEnumerable<TrackFxEnvelope> EnumerateTrackEnvelopes()
+  {
+    var count = Reaper.CountTrackEnvelopes(ReaperHandle);
+    return Enumerable.Range(0, count)
+      .Select(i => TrackFxEnvelope.FromHandle(Reaper.GetTrackEnvelope(ReaperHandle, i)));
+  }
+
   public TrackMediaItem CreateEmptyItem(TimeSpan? position = null, TimeSpan? length = null)
   {
     var handle = Reaper.AddMediaItemToTrack(ReaperHandle);
@@ -175,6 +193,39 @@ public sealed class Track
       position.Value.TotalSeconds, (position + length).Value.TotalSeconds,
       IntPtr.Zero);
     return TrackMediaItem.FromHandle(handle);
+  }
+
+  public List<TrackMediaItem> GetSelectedItems(int? maxCount = null)
+  {
+    var items = TrackMediaItem.Enumerate(this);
+    List<TrackMediaItem> result = [];
+    foreach (var item in items)
+    {
+      if (item.Selected)
+      {
+        result.Add(item);
+      }
+
+      if (maxCount.HasValue && result.Count >= maxCount.Value) break;
+    }
+
+    return result;
+  }
+
+  public string? GetTrackStateChunk()
+  {
+    const int bufferSize = 1024 * 1024 * 20;
+    var ptr = Marshal.AllocHGlobal(bufferSize);
+    try
+    {
+      return Reaper.GetTrackStateChunk(ReaperHandle, ptr, Reaper.NeedBigBufferSize, false)
+        ? Marshal.PtrToStringAnsi(ptr)
+        : null;
+    }
+    finally
+    {
+      Marshal.FreeHGlobal(ptr);
+    }
   }
 
   public override string ToString()

@@ -26,7 +26,7 @@ public sealed class ReaperCommand
       }
       catch (Exception exception)
       {
-        logger?.LogError(exception, "Command execution failed.");
+        logger?.LogError(exception, $"Command execution failed: {exception.Message}");
       }
     });
   }

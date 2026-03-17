@@ -61,6 +61,10 @@ public class Project
     ReaperHandle = handle;
   }
 
+  public List<Track> GetTracks()
+  {
+    return Track.Enumerate(this).ToList();
+  }
 
   public List<Track> GetSelectedTracks()
   {
@@ -110,6 +114,22 @@ public class Project
     SetSelection(ai.Start, ai.End);
   }
 
+  public List<TrackMediaItem> GetSelectedItems(int? maxCount = null)
+  {
+    var items = TrackMediaItem.Enumerate(this);
+    List<TrackMediaItem> result = [];
+    foreach (var item in items)
+    {
+      if (item.Selected)
+      {
+        result.Add(item);
+      }
+
+      if (maxCount.HasValue && result.Count >= maxCount.Value) break;
+    }
+
+    return result;
+  }
 
   public void StartStopRecordingAtNextMeasure()
   {

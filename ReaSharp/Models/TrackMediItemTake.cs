@@ -85,4 +85,20 @@ public sealed class TrackMediItemTake
   {
     Reaper.MIDI_InsertNote(ReaperHandle, false, false, 0, 10, 1, 100, 100, IntPtr.Zero);
   }
+
+  public MediaItemSource? GetSource()
+  {
+    var handle = Reaper.GetMediaItemTake_Source(ReaperHandle);
+    return handle == IntPtr.Zero ? null : new MediaItemSource(handle);
+  }
+
+  public void SetSource(MediaItemSource? src)
+  {
+    var oldSource = GetSource();
+    Reaper.SetMediaItemTake_Source(ReaperHandle, src?.ReaperHandle ?? IntPtr.Zero);
+    if (oldSource != null)
+    {
+      Marshal.FreeHGlobal(oldSource.ReaperHandle);
+    }
+  }
 }
