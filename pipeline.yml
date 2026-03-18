@@ -1,0 +1,39 @@
+variables:
+- name: VersionPart_Major
+  value: 0
+- name: VersionPart_Minor
+  value: 0
+- name: VersionPart_Build
+  value: '$[counter(format(''{0}.{1}'', variables[''VersionPart_Major''], variables[''VersionPart_Minor'']), 0)]'
+- name: Build_Version
+  value: '$[format(''{0}.{1}.{2}'', variables[''VersionPart_Major''], variables[''VersionPart_Minor''], variables[''VersionPart_Build''])]'
+- group: Build
+
+name: v$(Build_Version)
+
+resources:
+  repositories:
+  - repository: DotNetBuilder
+    type: github
+    name: Hemisphera/DotNetBuilder
+    endpoint: github.com_hemisphera
+
+trigger:
+  branches:
+    include: [ 'master' ]
+
+stages:
+
+- stage: 'Build'
+  displayName: 'Build'
+  jobs:
+  - template: Templates/jobs/build-and-test.yml@DotNetBuilder
+    parameters:
+      dotNetVersion: 10.x
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - template: 'Templates/jobs/deploy-nuget.yml@DotNetBuilder'
+    parameters:
+      feedApiKey: $(NUGET_API_KEY)
+      authenticateFeeds: 'Nuget_Push'
