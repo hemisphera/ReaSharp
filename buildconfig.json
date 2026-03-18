@@ -1,0 +1,6 @@
+{
+    "SkipTests": true,
+    "ProjectsToPack": [
+        "ReaSharp\\ReaSharp.csproj"
+    ]
+}
