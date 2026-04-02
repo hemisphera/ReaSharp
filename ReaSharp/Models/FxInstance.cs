@@ -7,6 +7,7 @@ public class FxInstance
   public ReaperObject Owner { get; }
   public Track? Track => Owner as Track;
   public TrackMediaItemTake? Take => Owner as TrackMediaItemTake;
+  public FxInstanceType Type { get; }
 
   public string? Name => GetFxName();
 
@@ -42,6 +43,18 @@ public class FxInstance
     return new FxInstance(track, idx);
   }
 
+  public static List<FxInstance> EnumerateFromTake(TrackMediaItemTake take)
+  {
+    var result = new List<FxInstance>();
+    var count = Reaper.TakeFX_GetCount(take.ReaperHandle);
+    for (var i = 0; i < count; i++)
+    {
+      result.Add(new FxInstance(take, i));
+    }
+
+    return result;
+  }
+
   public static FxInstance FromTakeByIndex(TrackMediaItemTake take, int idx)
   {
     return new FxInstance(take, idx);
@@ -52,6 +65,7 @@ public class FxInstance
   {
     Owner = owner;
     Index = index;
+    Type = owner is Track ? FxInstanceType.Track : FxInstanceType.Take;
   }
 
 
