@@ -9,11 +9,9 @@ public class PluginState
 {
   private static PluginState? _instance;
 
-  //private static ReaperSynchronizationContext? _syncContext;
   private readonly IHost _host;
 
   public static PluginState Instance => _instance ?? throw new Exception("Plugin state not initialized.");
-  //public static ReaperSynchronizationContext SyncContext => _syncContext ?? throw new Exception("Plugin state not initialized.");
 
   public ICommandRegistry? Commands => Services.GetService<ICommandRegistry>();
   public IServiceProvider Services => _host.Services;
@@ -21,15 +19,15 @@ public class PluginState
 
   public static PluginState Initialize(ReaperPluginInfo pluginInfo, IHost host)
   {
-    // Establish the main-thread SynchronizationContext before building the host so that
-    // any async continuations awaited from plugin code are marshaled back here.
-    //_syncContext = new ReaperSynchronizationContext();
-    //SynchronizationContext.SetSynchronizationContext(_syncContext);
-
     _instance = new PluginState(pluginInfo, host);
     ConfigureHookCommand();
-    //ConfigureTimer();
     return _instance;
+  }
+
+
+  public ICommandRegistry EnsureCommandRegistry()
+  {
+    return Commands ?? throw new Exception("No command registry specified.");
   }
 
 
@@ -51,25 +49,6 @@ public class PluginState
       Marshal.FreeHGlobal(hookName);
     }
   }
-
-  /*
-  private static void ConfigureTimer()
-  {
-    unsafe
-    {
-      var timerPtr = (IntPtr)(delegate* unmanaged[Cdecl]<void>)&TimerCallback;
-      var timerName = Marshal.StringToHGlobalAnsi("timer");
-      Reaper.Register(timerName, timerPtr);
-      Marshal.FreeHGlobal(timerName);
-    }
-  }
-
-  [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-  private static void TimerCallback()
-  {
-    _syncContext?.ProcessQueue();
-  }
-  */
 
   /// <summary>
   /// Called by REAPER for every command execution in the main section.

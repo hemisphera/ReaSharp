@@ -24,7 +24,7 @@ public class DefaultCommandRegistry : ICommandRegistry
   /// <param name="uniqueName">Stable, unique identifier for this command (e.g. "ReaSharp_MyAction"). Must not change between sessions.</param>
   /// <param name="description">Label shown in the REAPER Action List.</param>
   /// <param name="handler">Callback invoked when the command is triggered.</param>
-  public ReaperCommand Register(string uniqueName, string description, Func<Task> handler)
+  public ReaperCommand Register(string uniqueName, string description, Func<IServiceProvider, Task> handler)
   {
     // Step 1: register the named command ID — return value IS the assigned command ID.
     var uniqueNamePtr = Marshal.StringToHGlobalAnsi(uniqueName);

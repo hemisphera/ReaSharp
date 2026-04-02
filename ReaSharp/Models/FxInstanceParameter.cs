@@ -17,8 +17,8 @@ public sealed class FxInstanceParameter
       try
       {
         var ok = FxInstance.Track != null
-          ? Reaper.TrackFX_GetNamedConfigParm(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize)
-          : Reaper.TakeFX_GetNamedConfigParm(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize);
+          ? Reaper.TrackFX_GetParamName(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize)
+          : Reaper.TakeFX_GetParamName(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize);
         return ok ? Marshal.PtrToStringAnsi(buffer) : null;
       }
       finally

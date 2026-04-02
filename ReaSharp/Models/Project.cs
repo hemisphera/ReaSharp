@@ -66,6 +66,11 @@ public class Project : ReaperObject
     return Track.Enumerate(this).ToList();
   }
 
+  public Track? GetSelectedTrack()
+  {
+    return GetSelectedTracks().FirstOrDefault();
+  }
+
   public List<Track> GetSelectedTracks()
   {
     var tracks = new List<Track>();
