@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>reaper_reatest</AssemblyName>
+        <PublishAot>true</PublishAot>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NativeLib>Shared</NativeLib>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\ReaSharp\ReaSharp.csproj" />
+    </ItemGroup>
+
+</Project>
