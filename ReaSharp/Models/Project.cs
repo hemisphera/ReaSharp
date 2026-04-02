@@ -2,7 +2,7 @@
 
 namespace ReaSharp.Models;
 
-public class Project
+public class Project : ReaperObject
 {
   public static readonly Project Default = new(IntPtr.Zero);
   public static Project Current => GetProjectByIndex(-1) ?? throw new Exception("Unable to get current project");
@@ -49,7 +49,7 @@ public class Project
   }
 
 
-  public IntPtr ReaperHandle { get; }
+  public override IntPtr ReaperHandle { get; }
 
   public int Index { get; init; } = -1;
 
@@ -64,6 +64,11 @@ public class Project
   public List<Track> GetTracks()
   {
     return Track.Enumerate(this).ToList();
+  }
+
+  public Track? GetSelectedTrack()
+  {
+    return GetSelectedTracks().FirstOrDefault();
   }
 
   public List<Track> GetSelectedTracks()

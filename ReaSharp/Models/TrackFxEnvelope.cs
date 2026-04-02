@@ -2,11 +2,14 @@
 
 namespace ReaSharp.Models;
 
-public class TrackFxEnvelope
+public class TrackFxEnvelope : ReaperObject
 {
-  public IntPtr ReaperHandle { get; }
+  public FxInstanceParameter InstanceParameter { get; }
+  public override IntPtr ReaperHandle { get; }
 
   public Track Track { get; }
+
+  public FxInstance FxInstance { get; }
 
   public bool Visible
   {
@@ -45,28 +48,41 @@ public class TrackFxEnvelope
     }
   }
 
-  public int FxIndex { get; }
-
-  public int FxParameterIndex { get; }
+  public int Index { get; }
 
 
-  public static TrackFxEnvelope FromHandle(IntPtr handle)
+  public static TrackFxEnvelope FromHandle(nint handle)
   {
     return new TrackFxEnvelope(handle);
   }
 
 
-  private TrackFxEnvelope(IntPtr reaperHandle)
+  private TrackFxEnvelope(nint reaperHandle)
   {
     ReaperHandle = reaperHandle;
     int fxIndex = 0, fxParamIndex = 0;
     unsafe
     {
-      Track = Track.FromHandle(Reaper.Envelope_GetParentTrack(ReaperHandle, (nint)(&fxIndex), (nint)(&fxParamIndex)));
+      Track = Track.FromHandle(Reaper.Envelope_GetParentTrack(reaperHandle, (nint)(&fxIndex), (nint)(&fxParamIndex)));
     }
 
-    FxIndex = fxIndex;
-    FxParameterIndex = fxParamIndex;
+    FxInstance = Track.GetFx(fxIndex);
+    InstanceParameter = FxInstance.GetParameter(fxParamIndex);
+    Index = fxParamIndex;
+  }
+
+
+  public double GetValue(TimeSpan pos)
+  {
+    double value = 0;
+    unsafe
+    {
+      Reaper.Envelope_Evaluate(
+        ReaperHandle, pos.TotalSeconds, 0, 0, (IntPtr)(&value),
+        IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+    }
+
+    return value;
   }
 
 
@@ -100,12 +116,6 @@ public class TrackFxEnvelope
       Marshal.FreeHGlobal(ptr);
       Marshal.FreeHGlobal(ptrValue);
     }
-  }
-
-  public ParameterValue GetValue()
-  {
-    var fx = TrackFx.FromIndex(Track, FxIndex);
-    return fx.GetValue(FxParameterIndex);
   }
 
   public string? GetStateChunk()

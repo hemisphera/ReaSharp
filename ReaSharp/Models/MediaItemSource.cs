@@ -1,8 +1,8 @@
 ﻿namespace ReaSharp.Models;
 
-public class MediaItemSource
+public class MediaItemSource : ReaperObject
 {
-  public IntPtr ReaperHandle { get; }
+  public override IntPtr ReaperHandle { get; }
 
   public MediaItemSource(nint getMediaItemTakeSource)
   {

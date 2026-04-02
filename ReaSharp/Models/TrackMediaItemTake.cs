@@ -2,11 +2,11 @@
 
 namespace ReaSharp.Models;
 
-public sealed class TrackMediItemTake
+public sealed class TrackMediaItemTake : ReaperObject
 {
-  public static TrackMediItemTake FromHandle(IntPtr handle)
+  public static TrackMediaItemTake FromHandle(IntPtr handle)
   {
-    return new TrackMediItemTake(handle);
+    return new TrackMediaItemTake(handle);
   }
 
 
@@ -16,10 +16,10 @@ public sealed class TrackMediItemTake
     set => SetStringValue("P_NAME", value);
   }
 
-  public IntPtr ReaperHandle { get; set; }
+  public override IntPtr ReaperHandle { get; }
 
 
-  private TrackMediItemTake(IntPtr handle)
+  private TrackMediaItemTake(IntPtr handle)
   {
     ReaperHandle = handle;
   }

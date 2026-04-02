@@ -103,20 +103,20 @@ public sealed class TrackMediaItem : IArrangeItem
   }
 
 
-  public TrackMediItemTake CreateTake()
+  public TrackMediaItemTake CreateTake()
   {
     var handle = Reaper.AddTakeToMediaItem(ReaperHandle);
-    return TrackMediItemTake.FromHandle(handle);
+    return TrackMediaItemTake.FromHandle(handle);
   }
 
-  public List<TrackMediItemTake> EnumerateTakes()
+  public List<TrackMediaItemTake> EnumerateTakes()
   {
-    var result = new List<TrackMediItemTake>();
+    var result = new List<TrackMediaItemTake>();
     var count = Reaper.GetMediaItemNumTakes(ReaperHandle);
     for (var i = 0; i < count; i++)
     {
       var handle = Reaper.GetMediaItemTake(ReaperHandle, i);
-      result.Add(TrackMediItemTake.FromHandle(handle));
+      result.Add(TrackMediaItemTake.FromHandle(handle));
     }
 
     return result;
