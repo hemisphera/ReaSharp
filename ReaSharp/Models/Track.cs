@@ -2,7 +2,7 @@
 
 namespace ReaSharp.Models;
 
-public sealed class Track
+public sealed class Track : ReaperObject
 {
   public static IEnumerable<Track> Enumerate(Project? project = null)
   {
@@ -29,7 +29,7 @@ public sealed class Track
   }
 
 
-  public IntPtr ReaperHandle { get; }
+  public override IntPtr ReaperHandle { get; }
   public Project Project => Project.FromHandle((IntPtr)GetValue("P_PROJECT"));
   public int Index { get; }
   public Guid Id { get; }
@@ -162,9 +162,14 @@ public sealed class Track
     return Enumerable.Range(0, itemCount).Select(i => TrackMediaItem.FromByTrackIndex(this, i));
   }
 
-  public IEnumerable<TrackFx> EnumerateFx()
+  public IEnumerable<FxInstance> EnumerateFx()
   {
-    return TrackFx.Enumerate(this);
+    return FxInstance.EnumerateFromTrack(this);
+  }
+
+  public FxInstance GetFx(int index)
+  {
+    return FxInstance.FromTrackByIndex(this, index);
   }
 
   public IEnumerable<TrackFxEnvelope> EnumerateTrackEnvelopes()
