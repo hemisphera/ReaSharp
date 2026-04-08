@@ -64,6 +64,12 @@ public sealed class TrackMediaItem : IArrangeItem
 
   public TimeSpan End => Start + Length;
 
+  public bool LoopSource
+  {
+    get => GetValue("B_LOOPSRC") != 0;
+    set => SetValue("B_LOOPSRC", value ? 1 : 0);
+  }
+
   public IntPtr ReaperHandle { get; }
 
 
@@ -107,6 +113,12 @@ public sealed class TrackMediaItem : IArrangeItem
   {
     var handle = Reaper.AddTakeToMediaItem(ReaperHandle);
     return TrackMediaItemTake.FromHandle(handle);
+  }
+
+  public TrackMediaItemTake? GetActiveTake()
+  {
+    var handle = Reaper.GetActiveTake(ReaperHandle);
+    return handle != IntPtr.Zero ? TrackMediaItemTake.FromHandle(handle) : null;
   }
 
   public List<TrackMediaItemTake> EnumerateTakes()
