@@ -82,6 +82,11 @@ public sealed class Track : ReaperObject
     set => SetValue("B_SHOWINTCP", value ? 1 : 0);
   }
 
+  public bool Selected
+  {
+    get => (int)GetValue("I_SELECTED") != 0;
+    set => SetValue("I_SELECTED", value ? 1 : 0);
+  }
 
   private Track(IntPtr trackHandle)
   {
@@ -236,5 +241,17 @@ public sealed class Track : ReaperObject
   public override string ToString()
   {
     return $"{Id}: {Name}";
+  }
+
+  public void SelectExclusive()
+  {
+    var selectedTracks = Project.GetSelectedTracks();
+    foreach (var track in selectedTracks)
+    {
+      if (track.ReaperHandle != ReaperHandle)
+        track.Selected = false;
+    }
+
+    Selected = true;
   }
 }
