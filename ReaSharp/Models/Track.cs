@@ -88,6 +88,9 @@ public sealed class Track : ReaperObject
     set => SetValue("I_SELECTED", value ? 1 : 0);
   }
 
+  public int MediaItemCount => Reaper.CountTrackMediaItems(ReaperHandle);
+
+
   private Track(IntPtr trackHandle)
   {
     ReaperHandle = trackHandle;
