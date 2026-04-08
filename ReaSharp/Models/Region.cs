@@ -5,11 +5,13 @@ namespace ReaSharp.Models;
 public sealed class Region : IArrangeItem
 {
   public required int Id { get; init; }
+  public required Project Project { get; init; }
   public required string Name { get; init; }
   public TimeSpan Start { get; init; }
   public TimeSpan End { get; init; }
   public TimeSpan Duration => End - Start;
-
+  
+  
   public static IEnumerable<Region> Enumerate(Project? project = null)
   {
     project ??= Project.Default;
@@ -43,6 +45,7 @@ public sealed class Region : IArrangeItem
         {
           regions.Add(new Region
           {
+            Project = project,
             Id = markOrRegionIndex,
             Name = Marshal.PtrToStringAnsi(namePtr) ?? string.Empty,
             Start = TimeSpan.FromSeconds(pos),
