@@ -145,6 +145,11 @@ public sealed class TrackMediaItem : IArrangeItem
     Selected = true;
   }
 
+  public void Delete()
+  {
+    Reaper.DeleteTrackMediaItem(Track.ReaperHandle, ReaperHandle);
+  }
+
   public override string ToString()
   {
     return $"{ReaperHandle} ({Start} - {Start + Length})";
