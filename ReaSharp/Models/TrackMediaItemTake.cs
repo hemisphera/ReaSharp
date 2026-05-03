@@ -6,7 +6,9 @@ public sealed class TrackMediaItemTake : ReaperObject
 {
   public static TrackMediaItemTake FromHandle(IntPtr handle)
   {
-    return new TrackMediaItemTake(handle);
+    return handle == IntPtr.Zero
+      ? throw new ArgumentException("Handle cannot be zero.", nameof(handle))
+      : new TrackMediaItemTake(handle);
   }
 
 
@@ -17,6 +19,18 @@ public sealed class TrackMediaItemTake : ReaperObject
   }
 
   public override IntPtr ReaperHandle { get; }
+
+  public int MidiEventCount
+  {
+    get
+    {
+      int noteCount, ccCount, sysExCount;
+      unsafe
+      {
+        return Reaper.MIDI_CountEvts(ReaperHandle, (nint)(&noteCount), (nint)(&ccCount), (nint)(&sysExCount));
+      }
+    }
+  }
 
 
   private TrackMediaItemTake(IntPtr handle)
@@ -100,5 +114,10 @@ public sealed class TrackMediaItemTake : ReaperObject
     {
       Marshal.FreeHGlobal(oldSource.ReaperHandle);
     }
+  }
+
+  public void DeleteMidiEvent(int index)
+  {
+    Reaper.MIDI_DeleteEvt(ReaperHandle, index);
   }
 }

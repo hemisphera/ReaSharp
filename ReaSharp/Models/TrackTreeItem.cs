@@ -2,6 +2,11 @@
 
 public class TrackTreeItem
 {
+  public static TrackTreeItem[] Build(Project project)
+  {
+    return Build(project.GetTracks());
+  }
+
   public static TrackTreeItem[] Build(IEnumerable<Track> tracks)
   {
     var roots = new List<TrackTreeItem>();
@@ -47,6 +52,23 @@ public class TrackTreeItem
   public Track Track { get; }
   public List<TrackTreeItem> Children { get; } = [];
   public int Level { get; }
+
+  public IEnumerable<TrackTreeItem> FlattenChildren(Predicate<TrackTreeItem>? predicate = null)
+  {
+    var result = new List<TrackTreeItem>();
+    Recurse(predicate, result);
+    return result;
+  }
+
+  private void Recurse(Predicate<TrackTreeItem>? predicate, IList<TrackTreeItem> found)
+  {
+    foreach (var item in Children)
+    {
+      if (predicate == null || predicate(item))
+        found.Add(item);
+      item.Recurse(predicate, found);
+    }
+  }
 
 
   public TrackTreeItem(TrackTreeItem? parent, Track track, int level)

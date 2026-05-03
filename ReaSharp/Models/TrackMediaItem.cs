@@ -52,17 +52,23 @@ public sealed class TrackMediaItem : IArrangeItem
 
   public TimeSpan Length
   {
-    get => TimeSpan.FromSeconds(GetValue("D_LENGTH"));
+    get => TimeSpan.FromSeconds(Math.Round(GetValue("D_LENGTH"), 5));
     set => SetValue("D_LENGTH", value.TotalSeconds);
   }
 
   public TimeSpan Start
   {
-    get => TimeSpan.FromSeconds(GetValue("D_POSITION"));
+    get => TimeSpan.FromSeconds(Math.Round(GetValue("D_POSITION"), 5));
     set => SetValue("D_POSITION", value.TotalSeconds);
   }
 
   public TimeSpan End => Start + Length;
+
+  public bool LoopSource
+  {
+    get => GetValue("B_LOOPSRC") != 0;
+    set => SetValue("B_LOOPSRC", value ? 1 : 0);
+  }
 
   public IntPtr ReaperHandle { get; }
 
@@ -109,6 +115,12 @@ public sealed class TrackMediaItem : IArrangeItem
     return TrackMediaItemTake.FromHandle(handle);
   }
 
+  public TrackMediaItemTake? GetActiveTake()
+  {
+    var handle = Reaper.GetActiveTake(ReaperHandle);
+    return handle != IntPtr.Zero ? TrackMediaItemTake.FromHandle(handle) : null;
+  }
+
   public List<TrackMediaItemTake> EnumerateTakes()
   {
     var result = new List<TrackMediaItemTake>();
@@ -131,6 +143,11 @@ public sealed class TrackMediaItem : IArrangeItem
     }
 
     Selected = true;
+  }
+
+  public void Delete()
+  {
+    Reaper.DeleteTrackMediaItem(Track.ReaperHandle, ReaperHandle);
   }
 
   public override string ToString()

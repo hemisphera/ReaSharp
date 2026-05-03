@@ -20,17 +20,13 @@ public class Transport
     }
   }
 
+  public List<ITransportChangeListener> ChangeListeners { get; } = [];
+
   public TimeSpan PlayheadPosition { get; private set; }
   public TimeSpan PlayheadOrCursorPosition => IsPlaying ? PlayheadPosition : CursorPosition;
   public BeatPosition CursorBeatsPosition { get; private set; }
   public BeatPosition PlayheadBeatsPosition { get; private set; }
   public BeatPosition PlayheadOrCursorBeatsPosition => IsPlaying ? PlayheadBeatsPosition : CursorBeatsPosition;
-
-
-  public event EventHandler? RecordingStarted;
-  public event EventHandler? RecordingStopped;
-  public event EventHandler? PlaybackStarted;
-  public event EventHandler? PlaybackStopped;
 
 
   public Transport(Project? project = null)
@@ -62,16 +58,50 @@ public class Transport
 
   private void FireEvents(bool wasRecording, bool wasPlaying)
   {
-    if (wasRecording != IsRecording)
+    foreach (var listener in ChangeListeners)
     {
-      var handler = IsRecording ? RecordingStarted : RecordingStopped;
-      handler?.Invoke(this, EventArgs.Empty);
-    }
+      if (wasRecording != IsRecording)
+      {
+        Func<Task> handler = IsRecording ? listener.RecordingStarted : listener.RecordingStopped;
+        handler.Invoke();
+      }
 
-    if (wasPlaying != IsPlaying)
-    {
-      var handler = wasPlaying ? PlaybackStarted : PlaybackStopped;
-      handler?.Invoke(this, EventArgs.Empty);
+      if (wasPlaying != IsPlaying)
+      {
+        Func<Task> handler = wasPlaying ? listener.PlaybackStarted : listener.PlaybackStopped;
+        handler.Invoke();
+      }
     }
+  }
+
+  public void Play()
+  {
+    Reaper.Main_OnCommandEx(1007, 0, Project.ReaperHandle);
+  }
+
+  public void Stop()
+  {
+    Reaper.Main_OnCommandEx(1016, 0, Project.ReaperHandle);
+  }
+
+  public void Record()
+  {
+    Reaper.Main_OnCommandEx(1013, 0, Project.ReaperHandle);
+  }
+
+  public void ToggleRecordAtNextMeasure()
+  {
+    Reaper.Main_OnCommandEx(40003, 0, Project.ReaperHandle);
+  }
+
+  public void ToggleRecordAtNextBeat()
+  {
+    Reaper.Main_OnCommandEx(40045, 0, Project.ReaperHandle);
+  }
+
+  public void Pause(bool b)
+  {
+    if (IsPaused == b) return;
+    Reaper.Main_OnCommandEx(1008, 0, Project.ReaperHandle);
   }
 }
