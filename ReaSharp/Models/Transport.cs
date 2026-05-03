@@ -94,6 +94,11 @@ public class Transport
     Reaper.Main_OnCommandEx(40003, 0, Project.ReaperHandle);
   }
 
+  public void ToggleRecordAtNextBeat()
+  {
+    Reaper.Main_OnCommandEx(40045, 0, Project.ReaperHandle);
+  }
+
   public void Pause(bool b)
   {
     if (IsPaused == b) return;

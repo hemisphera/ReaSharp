@@ -52,13 +52,13 @@ public sealed class TrackMediaItem : IArrangeItem
 
   public TimeSpan Length
   {
-    get => TimeSpan.FromSeconds(GetValue("D_LENGTH"));
+    get => TimeSpan.FromSeconds(Math.Round(GetValue("D_LENGTH"), 5));
     set => SetValue("D_LENGTH", value.TotalSeconds);
   }
 
   public TimeSpan Start
   {
-    get => TimeSpan.FromSeconds(GetValue("D_POSITION"));
+    get => TimeSpan.FromSeconds(Math.Round(GetValue("D_POSITION"), 5));
     set => SetValue("D_POSITION", value.TotalSeconds);
   }
 
