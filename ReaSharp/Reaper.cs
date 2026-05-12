@@ -2923,6 +2923,14 @@ public static class Reaper
   // </auto-generated-reaper-properties>
 
 
+  internal static void LoadFunctions(params IPreloadable[] functions)
+  {
+    foreach (var function in functions)
+    {
+      function.Load();
+    }
+  }
+
   internal static void LoadFunctions(ReaperPluginInfo pluginInfo)
   {
     GetFunc = Marshal.GetDelegateForFunctionPointer<GetFuncDelegate>(pluginInfo.GetFunc);
