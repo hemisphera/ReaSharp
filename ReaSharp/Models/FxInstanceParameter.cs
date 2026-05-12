@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -17,8 +17,8 @@ public sealed class FxInstanceParameter
       try
       {
         var ok = FxInstance.Track != null
-          ? Reaper.TrackFX_GetParamName(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize)
-          : Reaper.TakeFX_GetParamName(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize);
+          ? Reaper.TrackFX_GetParamName.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize)
+          : Reaper.TakeFX_GetParamName.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize);
         return ok ? Marshal.PtrToStringAnsi(buffer) : null;
       }
       finally
@@ -66,8 +66,8 @@ public sealed class FxInstanceParameter
     unsafe
     {
       var value = FxInstance.Track != null
-        ? Reaper.TrackFX_GetParam(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&minVal), (nint)(&maxVal))
-        : Reaper.TakeFX_GetParam(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&minVal), (nint)(&maxVal));
+        ? Reaper.TrackFX_GetParam.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&minVal), (nint)(&maxVal))
+        : Reaper.TakeFX_GetParam.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&minVal), (nint)(&maxVal));
       return (minVal, maxVal, value);
     }
   }
@@ -78,8 +78,8 @@ public sealed class FxInstanceParameter
     unsafe
     {
       _ = FxInstance.Track != null
-        ? Reaper.TrackFX_GetParameterStepSizes(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&steps), (nint)(&smallSteps), (nint)(&largeSteps), (nint)(&isToggle))
-        : Reaper.TakeFX_GetParameterStepSizes(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&steps), (nint)(&smallSteps), (nint)(&largeSteps), (nint)(&isToggle));
+        ? Reaper.TrackFX_GetParameterStepSizes.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&steps), (nint)(&smallSteps), (nint)(&largeSteps), (nint)(&isToggle))
+        : Reaper.TakeFX_GetParameterStepSizes.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, (nint)(&steps), (nint)(&smallSteps), (nint)(&largeSteps), (nint)(&isToggle));
       return (steps, smallSteps, largeSteps, isToggle != 0);
     }
   }
@@ -91,8 +91,8 @@ public sealed class FxInstanceParameter
     try
     {
       var ok = FxInstance.Track != null
-        ? Reaper.TrackFX_GetFormattedParamValue(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize)
-        : Reaper.TakeFX_GetFormattedParamValue(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize);
+        ? Reaper.TrackFX_GetFormattedParamValue.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize)
+        : Reaper.TakeFX_GetFormattedParamValue.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, buffer, bufferSize);
       var strVal = ok ? Marshal.PtrToStringAnsi(buffer) : null;
       return strVal ?? string.Empty;
     }
@@ -105,7 +105,7 @@ public sealed class FxInstanceParameter
   public TrackFxEnvelope? GetEnvelope(TimeSpan pos, bool allowCreate = false)
   {
     if (FxInstance.Track == null) return null;
-    var ptr = Reaper.GetFXEnvelope(FxInstance.Track.ReaperHandle, FxInstance.Index, Index, allowCreate);
+    var ptr = Reaper.GetFXEnvelope.Invoke(FxInstance.Track.ReaperHandle, FxInstance.Index, Index, allowCreate);
     return ptr == IntPtr.Zero ? null : TrackFxEnvelope.FromHandle(ptr);
   }
 }

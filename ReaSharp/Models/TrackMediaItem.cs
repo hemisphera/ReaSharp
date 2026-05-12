@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -11,16 +11,16 @@ public sealed class TrackMediaItem : IArrangeItem
 
   public static TrackMediaItem FromByTrackIndex(Track track, int index)
   {
-    return FromHandle(Reaper.GetTrackMediaItem(track.ReaperHandle, index));
+    return FromHandle(Reaper.GetTrackMediaItem.Invoke(track.ReaperHandle, index));
   }
 
   public static List<TrackMediaItem> Enumerate(Track track)
   {
     var result = new List<TrackMediaItem>();
-    var count = Reaper.CountTrackMediaItems(track.ReaperHandle);
+    var count = Reaper.CountTrackMediaItems.Invoke(track.ReaperHandle);
     for (var i = 0; i < count; i++)
     {
-      var handle = Reaper.GetTrackMediaItem(track.ReaperHandle, i);
+      var handle = Reaper.GetTrackMediaItem.Invoke(track.ReaperHandle, i);
       result.Add(FromHandle(handle));
     }
 
@@ -31,10 +31,10 @@ public sealed class TrackMediaItem : IArrangeItem
   {
     project ??= Project.Default;
     var result = new List<TrackMediaItem>();
-    var count = Reaper.CountMediaItems(project.ReaperHandle);
+    var count = Reaper.CountMediaItems.Invoke(project.ReaperHandle);
     for (var i = 0; i < count; i++)
     {
-      var handle = Reaper.GetMediaItem(project.ReaperHandle, i);
+      var handle = Reaper.GetMediaItem.Invoke(project.ReaperHandle, i);
       result.Add(FromHandle(handle));
     }
 
@@ -42,7 +42,7 @@ public sealed class TrackMediaItem : IArrangeItem
   }
 
 
-  public Track Track => Track.FromHandle(Reaper.GetMediaItemTrack(ReaperHandle));
+  public Track Track => Track.FromHandle(Reaper.GetMediaItemTrack.Invoke(ReaperHandle));
 
   public bool Selected
   {
@@ -83,7 +83,7 @@ public sealed class TrackMediaItem : IArrangeItem
     var ptr = Marshal.StringToHGlobalAnsi(paramName);
     try
     {
-      var value = Reaper.GetMediaItemInfo_Value(ReaperHandle, ptr);
+      var value = Reaper.GetMediaItemInfo_Value.Invoke(ReaperHandle, ptr);
       return value;
     }
     finally
@@ -97,7 +97,7 @@ public sealed class TrackMediaItem : IArrangeItem
     var ptr = Marshal.StringToHGlobalAnsi(paramName);
     try
     {
-      if (!Reaper.SetMediaItemInfo_Value(ReaperHandle, ptr, newValue))
+      if (!Reaper.SetMediaItemInfo_Value.Invoke(ReaperHandle, ptr, newValue))
       {
         throw new Exception($"Unable to set value '{newValue}' for '{paramName}'.");
       }
@@ -111,23 +111,23 @@ public sealed class TrackMediaItem : IArrangeItem
 
   public TrackMediaItemTake CreateTake()
   {
-    var handle = Reaper.AddTakeToMediaItem(ReaperHandle);
+    var handle = Reaper.AddTakeToMediaItem.Invoke(ReaperHandle);
     return TrackMediaItemTake.FromHandle(handle);
   }
 
   public TrackMediaItemTake? GetActiveTake()
   {
-    var handle = Reaper.GetActiveTake(ReaperHandle);
+    var handle = Reaper.GetActiveTake.Invoke(ReaperHandle);
     return handle != IntPtr.Zero ? TrackMediaItemTake.FromHandle(handle) : null;
   }
 
   public List<TrackMediaItemTake> EnumerateTakes()
   {
     var result = new List<TrackMediaItemTake>();
-    var count = Reaper.GetMediaItemNumTakes(ReaperHandle);
+    var count = Reaper.GetMediaItemNumTakes.Invoke(ReaperHandle);
     for (var i = 0; i < count; i++)
     {
-      var handle = Reaper.GetMediaItemTake(ReaperHandle, i);
+      var handle = Reaper.GetMediaItemTake.Invoke(ReaperHandle, i);
       result.Add(TrackMediaItemTake.FromHandle(handle));
     }
 
@@ -147,7 +147,7 @@ public sealed class TrackMediaItem : IArrangeItem
 
   public void Delete()
   {
-    Reaper.DeleteTrackMediaItem(Track.ReaperHandle, ReaperHandle);
+    Reaper.DeleteTrackMediaItem.Invoke(Track.ReaperHandle, ReaperHandle);
   }
 
   public override string ToString()

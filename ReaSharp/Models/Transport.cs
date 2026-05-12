@@ -1,4 +1,4 @@
-﻿namespace ReaSharp.Models;
+namespace ReaSharp.Models;
 
 public class Transport
 {
@@ -16,7 +16,7 @@ public class Transport
     set
     {
       _cursorPosition = value;
-      Reaper.SetEditCurPos2(Project.ReaperHandle, _cursorPosition.TotalSeconds, false, false);
+      Reaper.SetEditCurPos2.Invoke(Project.ReaperHandle, _cursorPosition.TotalSeconds, false, false);
     }
   }
 
@@ -38,12 +38,12 @@ public class Transport
 
   public void Update()
   {
-    PlayheadPosition = TimeSpan.FromSeconds(Reaper.GetPlayPositionEx(Project.ReaperHandle));
-    _cursorPosition = TimeSpan.FromSeconds(Reaper.GetCursorPositionEx(Project.ReaperHandle));
+    PlayheadPosition = TimeSpan.FromSeconds(Reaper.GetPlayPositionEx.Invoke(Project.ReaperHandle));
+    _cursorPosition = TimeSpan.FromSeconds(Reaper.GetCursorPositionEx.Invoke(Project.ReaperHandle));
 
     var wasRecording = IsRecording;
     var wasPlaying = IsPlaying;
-    _playState = Reaper.GetPlayStateEx(Project.ReaperHandle);
+    _playState = Reaper.GetPlayStateEx.Invoke(Project.ReaperHandle);
 
     PlayheadBeatsPosition = BeatPosition.FromTime(PlayheadPosition, Project);
     CursorBeatsPosition = BeatPosition.FromTime(CursorPosition, Project);
@@ -53,7 +53,7 @@ public class Transport
 
   public void ToggleRecord()
   {
-    Reaper.Main_OnCommandEx(1013, 0, Project.ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(1013, 0, Project.ReaperHandle);
   }
 
   private void FireEvents(bool wasRecording, bool wasPlaying)
@@ -76,32 +76,32 @@ public class Transport
 
   public void Play()
   {
-    Reaper.Main_OnCommandEx(1007, 0, Project.ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(1007, 0, Project.ReaperHandle);
   }
 
   public void Stop()
   {
-    Reaper.Main_OnCommandEx(1016, 0, Project.ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(1016, 0, Project.ReaperHandle);
   }
 
   public void Record()
   {
-    Reaper.Main_OnCommandEx(1013, 0, Project.ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(1013, 0, Project.ReaperHandle);
   }
 
   public void ToggleRecordAtNextMeasure()
   {
-    Reaper.Main_OnCommandEx(40003, 0, Project.ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(40003, 0, Project.ReaperHandle);
   }
 
   public void ToggleRecordAtNextBeat()
   {
-    Reaper.Main_OnCommandEx(40045, 0, Project.ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(40045, 0, Project.ReaperHandle);
   }
 
   public void Pause(bool b)
   {
     if (IsPaused == b) return;
-    Reaper.Main_OnCommandEx(1008, 0, Project.ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(1008, 0, Project.ReaperHandle);
   }
 }

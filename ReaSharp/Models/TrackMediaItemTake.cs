@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -27,7 +27,7 @@ public sealed class TrackMediaItemTake : ReaperObject
       int noteCount, ccCount, sysExCount;
       unsafe
       {
-        return Reaper.MIDI_CountEvts(ReaperHandle, (nint)(&noteCount), (nint)(&ccCount), (nint)(&sysExCount));
+        return Reaper.MIDI_CountEvts.Invoke(ReaperHandle, (nint)(&noteCount), (nint)(&ccCount), (nint)(&sysExCount));
       }
     }
   }
@@ -44,7 +44,7 @@ public sealed class TrackMediaItemTake : ReaperObject
     var value = Marshal.AllocHGlobal(Reaper.NeedBigBufferSize);
     try
     {
-      return Reaper.GetSetMediaItemTakeInfo_String(ReaperHandle, ptr, value, false)
+      return Reaper.GetSetMediaItemTakeInfo_String.Invoke(ReaperHandle, ptr, value, false)
         ? Marshal.PtrToStringAnsi(value)
         : null;
     }
@@ -61,7 +61,7 @@ public sealed class TrackMediaItemTake : ReaperObject
     var ptrValue = string.IsNullOrEmpty(value) ? IntPtr.Zero : Marshal.StringToHGlobalAnsi(value);
     try
     {
-      Reaper.GetSetMediaItemTakeInfo_String(ReaperHandle, ptr, ptrValue, true);
+      Reaper.GetSetMediaItemTakeInfo_String.Invoke(ReaperHandle, ptr, ptrValue, true);
     }
     finally
     {
@@ -78,7 +78,7 @@ public sealed class TrackMediaItemTake : ReaperObject
       fixed (byte* ptr = buffer)
       {
         var bufferSize = buffer.Length;
-        var ok = Reaper.MIDI_GetAllEvts(ReaperHandle, (IntPtr)ptr, (IntPtr)(&bufferSize));
+        var ok = Reaper.MIDI_GetAllEvts.Invoke(ReaperHandle, (IntPtr)ptr, (IntPtr)(&bufferSize));
         return ok ? buffer[..bufferSize] : null;
       }
     }
@@ -90,26 +90,26 @@ public sealed class TrackMediaItemTake : ReaperObject
     {
       fixed (byte* ptr = data)
       {
-        return Reaper.MIDI_SetAllEvts(ReaperHandle, (nint)ptr, data.Length);
+        return Reaper.MIDI_SetAllEvts.Invoke(ReaperHandle, (nint)ptr, data.Length);
       }
     }
   }
 
   public void AddMidiEvent()
   {
-    Reaper.MIDI_InsertNote(ReaperHandle, false, false, 0, 10, 1, 100, 100, IntPtr.Zero);
+    Reaper.MIDI_InsertNote.Invoke(ReaperHandle, false, false, 0, 10, 1, 100, 100, IntPtr.Zero);
   }
 
   public MediaItemSource? GetSource()
   {
-    var handle = Reaper.GetMediaItemTake_Source(ReaperHandle);
+    var handle = Reaper.GetMediaItemTake_Source.Invoke(ReaperHandle);
     return handle == IntPtr.Zero ? null : new MediaItemSource(handle);
   }
 
   public void SetSource(MediaItemSource? src)
   {
     var oldSource = GetSource();
-    Reaper.SetMediaItemTake_Source(ReaperHandle, src?.ReaperHandle ?? IntPtr.Zero);
+    Reaper.SetMediaItemTake_Source.Invoke(ReaperHandle, src?.ReaperHandle ?? IntPtr.Zero);
     if (oldSource != null)
     {
       Marshal.FreeHGlobal(oldSource.ReaperHandle);
@@ -118,6 +118,6 @@ public sealed class TrackMediaItemTake : ReaperObject
 
   public void DeleteMidiEvent(int index)
   {
-    Reaper.MIDI_DeleteEvt(ReaperHandle, index);
+    Reaper.MIDI_DeleteEvt.Invoke(ReaperHandle, index);
   }
 }

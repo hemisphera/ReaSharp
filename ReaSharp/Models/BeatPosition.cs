@@ -1,4 +1,4 @@
-﻿namespace ReaSharp.Models;
+namespace ReaSharp.Models;
 
 public struct BeatPosition : IComparable<BeatPosition>, IEquatable<BeatPosition>
 {
@@ -14,7 +14,7 @@ public struct BeatPosition : IComparable<BeatPosition>, IEquatable<BeatPosition>
     {
       project ??= Project.Default;
       var measure = Measure;
-      var time = Reaper.TimeMap2_beatsToTime(project.ReaperHandle, Beats, (IntPtr)(&measure));
+      var time = Reaper.TimeMap2_beatsToTime.Invoke(project.ReaperHandle, Beats, (IntPtr)(&measure));
       return TimeSpan.FromSeconds(time);
     }
   }
@@ -28,7 +28,7 @@ public struct BeatPosition : IComparable<BeatPosition>, IEquatable<BeatPosition>
       var measureLength = 0;
       double totalBeats = 0;
       var denominator = 0;
-      var beats = Reaper.TimeMap2_timeToBeats(
+      var beats = Reaper.TimeMap2_timeToBeats.Invoke(
         project.ReaperHandle, time.TotalSeconds,
         (IntPtr)(&measure), (IntPtr)(&measureLength), (IntPtr)(&totalBeats), (IntPtr)(&denominator)
       );

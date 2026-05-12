@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using ReaSharp.Models;
 
 namespace ReaSharp.Utils;
@@ -34,8 +34,8 @@ public sealed class TrackMediaItemWatcher : IDisposable
       {
         while (!token.IsCancellationRequested)
         {
-          var count = Reaper.CountTrackMediaItems(Track.ReaperHandle);
-          var currentItems = Enumerable.Range(0, count).Select(i => Reaper.GetTrackMediaItem(Track.ReaperHandle, i)).ToList();
+          var count = Reaper.CountTrackMediaItems.Invoke(Track.ReaperHandle);
+          var currentItems = Enumerable.Range(0, count).Select(i => Reaper.GetTrackMediaItem.Invoke(Track.ReaperHandle, i)).ToList();
           _lastSnapshot ??= currentItems;
           var removedItems = _lastSnapshot.Except(currentItems).ToList();
           var addedItems = currentItems.Except(_lastSnapshot).ToList();

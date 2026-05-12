@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -37,7 +37,7 @@ public class TrackFxEnvelope : ReaperObject
       var value = Marshal.AllocHGlobal(bufferSize);
       try
       {
-        return Reaper.GetEnvelopeName(ReaperHandle, value, bufferSize)
+        return Reaper.GetEnvelopeName.Invoke(ReaperHandle, value, bufferSize)
           ? Marshal.PtrToStringAnsi(value)
           : null;
       }
@@ -63,7 +63,7 @@ public class TrackFxEnvelope : ReaperObject
     int fxIndex = 0, fxParamIndex = 0;
     unsafe
     {
-      Track = Track.FromHandle(Reaper.Envelope_GetParentTrack(reaperHandle, (nint)(&fxIndex), (nint)(&fxParamIndex)));
+      Track = Track.FromHandle(Reaper.Envelope_GetParentTrack.Invoke(reaperHandle, (nint)(&fxIndex), (nint)(&fxParamIndex)));
     }
 
     FxInstance = Track.GetFx(fxIndex);
@@ -77,7 +77,7 @@ public class TrackFxEnvelope : ReaperObject
     double value = 0;
     unsafe
     {
-      Reaper.Envelope_Evaluate(
+      Reaper.Envelope_Evaluate.Invoke(
         ReaperHandle, pos.TotalSeconds, 0, 0, (IntPtr)(&value),
         IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
     }
@@ -92,7 +92,7 @@ public class TrackFxEnvelope : ReaperObject
     var value = Marshal.AllocHGlobal(Reaper.NeedBigBufferSize);
     try
     {
-      return Reaper.GetSetEnvelopeInfo_String(ReaperHandle, ptr, value, false)
+      return Reaper.GetSetEnvelopeInfo_String.Invoke(ReaperHandle, ptr, value, false)
         ? Marshal.PtrToStringAnsi(value)
         : null;
     }
@@ -109,7 +109,7 @@ public class TrackFxEnvelope : ReaperObject
     var ptrValue = Marshal.StringToHGlobalAnsi(value);
     try
     {
-      Reaper.GetSetEnvelopeInfo_String(ReaperHandle, ptr, ptrValue, true);
+      Reaper.GetSetEnvelopeInfo_String.Invoke(ReaperHandle, ptr, ptrValue, true);
     }
     finally
     {
@@ -124,7 +124,7 @@ public class TrackFxEnvelope : ReaperObject
     var value = Marshal.AllocHGlobal(bufferSize);
     try
     {
-      return !Reaper.GetEnvelopeStateChunk(ReaperHandle, value, Reaper.NeedBigBufferSize, false)
+      return !Reaper.GetEnvelopeStateChunk.Invoke(ReaperHandle, value, Reaper.NeedBigBufferSize, false)
         ? null
         : Marshal.PtrToStringAnsi(value);
     }

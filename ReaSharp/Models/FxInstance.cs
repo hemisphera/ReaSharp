@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -16,9 +16,9 @@ public class FxInstance
     get
     {
       if (Track != null)
-        return Reaper.TrackFX_GetNumParams(Owner.ReaperHandle, Index);
+        return Reaper.TrackFX_GetNumParams.Invoke(Owner.ReaperHandle, Index);
       if (Take != null)
-        return Reaper.TakeFX_GetNumParams(Owner.ReaperHandle, Index);
+        return Reaper.TakeFX_GetNumParams.Invoke(Owner.ReaperHandle, Index);
       return 0;
     }
   }
@@ -29,7 +29,7 @@ public class FxInstance
   public static List<FxInstance> EnumerateFromTrack(Track track)
   {
     var result = new List<FxInstance>();
-    var count = Reaper.TrackFX_GetCount(track.ReaperHandle);
+    var count = Reaper.TrackFX_GetCount.Invoke(track.ReaperHandle);
     for (var i = 0; i < count; i++)
     {
       result.Add(new FxInstance(track, i));
@@ -46,7 +46,7 @@ public class FxInstance
   public static List<FxInstance> EnumerateFromTake(TrackMediaItemTake take)
   {
     var result = new List<FxInstance>();
-    var count = Reaper.TakeFX_GetCount(take.ReaperHandle);
+    var count = Reaper.TakeFX_GetCount.Invoke(take.ReaperHandle);
     for (var i = 0; i < count; i++)
     {
       result.Add(new FxInstance(take, i));
@@ -81,8 +81,8 @@ public class FxInstance
     try
     {
       var ok = Track != null
-        ? Reaper.TrackFX_GetFXName(Owner.ReaperHandle, Index, buffer, bufferSize)
-        : Reaper.TakeFX_GetFXName(Owner.ReaperHandle, Index, buffer, bufferSize);
+        ? Reaper.TrackFX_GetFXName.Invoke(Owner.ReaperHandle, Index, buffer, bufferSize)
+        : Reaper.TakeFX_GetFXName.Invoke(Owner.ReaperHandle, Index, buffer, bufferSize);
       return ok ? Marshal.PtrToStringAnsi(buffer) : null;
     }
     finally

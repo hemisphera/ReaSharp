@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -14,7 +14,7 @@ public class Project : ReaperObject
     var filename = Marshal.AllocHGlobal(bufSize);
     try
     {
-      var prj = Reaper.EnumProjects(index, filename, bufSize);
+      var prj = Reaper.EnumProjects.Invoke(index, filename, bufSize);
       if (prj == IntPtr.Zero) return null;
       return new Project(prj)
       {
@@ -74,10 +74,10 @@ public class Project : ReaperObject
   public List<Track> GetSelectedTracks()
   {
     var tracks = new List<Track>();
-    var count = Reaper.CountSelectedTracks2(ReaperHandle, false);
+    var count = Reaper.CountSelectedTracks2.Invoke(ReaperHandle, false);
     for (var i = 0; i < count; i++)
     {
-      var trackHandle = Reaper.GetSelectedTrack2(ReaperHandle, i, false);
+      var trackHandle = Reaper.GetSelectedTrack2.Invoke(ReaperHandle, i, false);
       tracks.Add(Track.FromHandle(trackHandle));
     }
 
@@ -87,14 +87,14 @@ public class Project : ReaperObject
 
   public int InvokeCommand(int id)
   {
-    Reaper.Main_OnCommandEx(id, 0, ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(id, 0, ReaperHandle);
     return id;
   }
 
   public int InvokeCommand(string id)
   {
     var handle = Marshal.StringToHGlobalAnsi(id);
-    var resp = Reaper.NamedCommandLookup(handle);
+    var resp = Reaper.NamedCommandLookup.Invoke(handle);
     Marshal.FreeHGlobal(handle);
     return resp > 0 ? InvokeCommand(resp) : -1;
   }
@@ -110,7 +110,7 @@ public class Project : ReaperObject
     {
       var startVal = start.TotalSeconds;
       var endVal = end.TotalSeconds;
-      Reaper.GetSet_LoopTimeRange2(ReaperHandle, true, false, (IntPtr)(&startVal), (IntPtr)(&endVal), false);
+      Reaper.GetSet_LoopTimeRange2.Invoke(ReaperHandle, true, false, (IntPtr)(&startVal), (IntPtr)(&endVal), false);
     }
   }
 
@@ -138,23 +138,23 @@ public class Project : ReaperObject
 
   public void StartStopRecordingAtNextMeasure()
   {
-    Reaper.Main_OnCommandEx(40003, 0, ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(40003, 0, ReaperHandle);
   }
 
   public void ZoomToTimeSelection()
   {
-    Reaper.Main_OnCommandEx(40031, 0, ReaperHandle);
+    Reaper.Main_OnCommandEx.Invoke(40031, 0, ReaperHandle);
   }
 
   public void BeginUndoBlock()
   {
-    Reaper.Undo_BeginBlock2(ReaperHandle);
+    Reaper.Undo_BeginBlock2.Invoke(ReaperHandle);
   }
 
   public void EndUndoBlock(string description)
   {
     var str = Marshal.StringToHGlobalAnsi(description);
-    Reaper.Undo_EndBlock2(ReaperHandle, str, -1);
+    Reaper.Undo_EndBlock2.Invoke(ReaperHandle, str, -1);
     Marshal.FreeHGlobal(str);
   }
 

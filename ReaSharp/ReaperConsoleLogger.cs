@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 
 namespace ReaSharp;
@@ -8,14 +8,14 @@ public class ReaperConsoleLogger : ILogger
   public static void ClearLog()
   {
     var msgData = Marshal.StringToHGlobalAnsi(string.Empty);
-    Reaper.ShowConsoleMsg(msgData);
+    Reaper.ShowConsoleMsg.Invoke(msgData);
     Marshal.FreeHGlobal(msgData);
   }
 
   public static void WriteLog(string msg)
   {
     var msgData = Marshal.StringToHGlobalAnsi(msg + "\n");
-    Reaper.ShowConsoleMsg(msgData);
+    Reaper.ShowConsoleMsg.Invoke(msgData);
     Marshal.FreeHGlobal(msgData);
   }
 

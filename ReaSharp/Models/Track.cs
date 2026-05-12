@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -8,7 +8,7 @@ public sealed class Track : ReaperObject
   {
     project ??= Project.Default;
     List<Track> tracks = [];
-    for (var i = 0; i < Reaper.GetNumTracks(); i++)
+    for (var i = 0; i < Reaper.GetNumTracks.Invoke(); i++)
     {
       tracks.Add(FromIndex(i, project));
     }
@@ -19,7 +19,7 @@ public sealed class Track : ReaperObject
   public static Track FromIndex(int index, Project? project = null)
   {
     project ??= Project.Default;
-    var handle = Reaper.GetTrack(project.ReaperHandle, index);
+    var handle = Reaper.GetTrack.Invoke(project.ReaperHandle, index);
     return FromHandle(handle);
   }
 
@@ -88,7 +88,7 @@ public sealed class Track : ReaperObject
     set => SetValue("I_SELECTED", value ? 1 : 0);
   }
 
-  public int MediaItemCount => Reaper.CountTrackMediaItems(ReaperHandle);
+  public int MediaItemCount => Reaper.CountTrackMediaItems.Invoke(ReaperHandle);
 
 
   private Track(IntPtr trackHandle)
@@ -105,7 +105,7 @@ public sealed class Track : ReaperObject
     var value = Marshal.AllocHGlobal(Reaper.NeedBigBufferSize);
     try
     {
-      return Reaper.GetSetMediaTrackInfo_String(ReaperHandle, ptr, value, false)
+      return Reaper.GetSetMediaTrackInfo_String.Invoke(ReaperHandle, ptr, value, false)
         ? Marshal.PtrToStringAnsi(value)
         : null;
     }
@@ -122,7 +122,7 @@ public sealed class Track : ReaperObject
     var ptrValue = Marshal.StringToHGlobalAnsi(value);
     try
     {
-      Reaper.GetSetMediaTrackInfo_String(ReaperHandle, ptr, ptrValue, true);
+      Reaper.GetSetMediaTrackInfo_String.Invoke(ReaperHandle, ptr, ptrValue, true);
     }
     finally
     {
@@ -136,7 +136,7 @@ public sealed class Track : ReaperObject
     var ptr = Marshal.StringToHGlobalAnsi(paramName);
     try
     {
-      var value = Reaper.GetMediaTrackInfo_Value(ReaperHandle, ptr);
+      var value = Reaper.GetMediaTrackInfo_Value.Invoke(ReaperHandle, ptr);
       //ReaperLogger.LogDebug($"Read '{paramName}': '{value}'.");
       return value;
     }
@@ -152,7 +152,7 @@ public sealed class Track : ReaperObject
     try
     {
       //ReaperLogger.LogDebug($"Setting '{paramName}' to '{newValue}'.");
-      if (!Reaper.SetMediaTrackInfo_Value(ReaperHandle, ptr, newValue))
+      if (!Reaper.SetMediaTrackInfo_Value.Invoke(ReaperHandle, ptr, newValue))
       {
         throw new Exception($"Unable to set value '{newValue}' for '{paramName}'.");
       }
@@ -166,7 +166,7 @@ public sealed class Track : ReaperObject
 
   public IEnumerable<TrackMediaItem> EnumerateMediaItems()
   {
-    var itemCount = Reaper.CountTrackMediaItems(ReaperHandle);
+    var itemCount = Reaper.CountTrackMediaItems.Invoke(ReaperHandle);
     return Enumerable.Range(0, itemCount).Select(i => TrackMediaItem.FromByTrackIndex(this, i));
   }
 
@@ -182,14 +182,14 @@ public sealed class Track : ReaperObject
 
   public IEnumerable<TrackFxEnvelope> EnumerateTrackEnvelopes()
   {
-    var count = Reaper.CountTrackEnvelopes(ReaperHandle);
+    var count = Reaper.CountTrackEnvelopes.Invoke(ReaperHandle);
     return Enumerable.Range(0, count)
-      .Select(i => TrackFxEnvelope.FromHandle(Reaper.GetTrackEnvelope(ReaperHandle, i)));
+      .Select(i => TrackFxEnvelope.FromHandle(Reaper.GetTrackEnvelope.Invoke(ReaperHandle, i)));
   }
 
   public TrackMediaItem CreateEmptyItem(TimeSpan? position = null, TimeSpan? length = null)
   {
-    var handle = Reaper.AddMediaItemToTrack(ReaperHandle);
+    var handle = Reaper.AddMediaItemToTrack.Invoke(ReaperHandle);
     //ReaperLogger.LogDebug($"Created media item {handle}");
     var item = TrackMediaItem.FromHandle(handle);
     item.Start = position ?? TimeSpan.FromSeconds(0);
@@ -201,7 +201,7 @@ public sealed class Track : ReaperObject
   {
     length ??= TimeSpan.FromSeconds(1);
     position ??= TimeSpan.FromSeconds(0);
-    var handle = Reaper.CreateNewMIDIItemInProj(
+    var handle = Reaper.CreateNewMIDIItemInProj.Invoke(
       ReaperHandle,
       position.Value.TotalSeconds, (position + length).Value.TotalSeconds,
       IntPtr.Zero);
@@ -231,7 +231,7 @@ public sealed class Track : ReaperObject
     var ptr = Marshal.AllocHGlobal(bufferSize);
     try
     {
-      return Reaper.GetTrackStateChunk(ReaperHandle, ptr, Reaper.NeedBigBufferSize, false)
+      return Reaper.GetTrackStateChunk.Invoke(ReaperHandle, ptr, Reaper.NeedBigBufferSize, false)
         ? Marshal.PtrToStringAnsi(ptr)
         : null;
     }

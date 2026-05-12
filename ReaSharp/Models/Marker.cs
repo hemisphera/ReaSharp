@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace ReaSharp.Models;
 
@@ -25,7 +25,7 @@ public sealed class Marker
         var markOrRegionIndex = 0;
         var color = 0;
 
-        var result = Reaper.EnumProjectMarkers3(
+        var result = Reaper.EnumProjectMarkers3.Invoke(
           project.ReaperHandle,
           idx,
           (IntPtr)(&isRegion),

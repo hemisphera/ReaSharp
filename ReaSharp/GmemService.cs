@@ -23,7 +23,7 @@ public sealed class GmemService : IGmemService
     var namePtr = Marshal.StringToHGlobalAnsi(name);
     try
     {
-      _gmem = Reaper.eel_gmem_attach(namePtr, isAlloc);
+      _gmem = Reaper.eel_gmem_attach.Invoke(namePtr, isAlloc);
     }
     finally
     {
@@ -41,7 +41,7 @@ public sealed class GmemService : IGmemService
     EnsureConnected();
     EnsureIndex(index);
 
-    Reaper.NSEEL_HOSTSTUB_EnterMutex();
+    Reaper.NSEEL_HOSTSTUB_EnterMutex.Invoke();
     try
     {
       unsafe
@@ -54,7 +54,7 @@ public sealed class GmemService : IGmemService
     }
     finally
     {
-      Reaper.NSEEL_HOSTSTUB_LEAVEMutex();
+      Reaper.NSEEL_HOSTSTUB_LEAVEMutex.Invoke();
     }
   }
 
@@ -63,7 +63,7 @@ public sealed class GmemService : IGmemService
     EnsureConnected();
     EnsureIndex(index);
 
-    Reaper.NSEEL_HOSTSTUB_EnterMutex();
+    Reaper.NSEEL_HOSTSTUB_EnterMutex.Invoke();
     try
     {
       unsafe
@@ -77,7 +77,7 @@ public sealed class GmemService : IGmemService
     }
     finally
     {
-      Reaper.NSEEL_HOSTSTUB_LEAVEMutex();
+      Reaper.NSEEL_HOSTSTUB_LEAVEMutex.Invoke();
     }
   }
 

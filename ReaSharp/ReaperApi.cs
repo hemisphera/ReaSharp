@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using ReaSharp.Models;
 
 namespace ReaSharp;
@@ -21,7 +21,7 @@ public static class ReaperApi
         double projPos = -1;
         var projLoopCnt = 0;
 
-        var seq = Reaper.MIDI_GetRecentInputEvent(idx, (IntPtr)buffer, (IntPtr)(&bufferSize), (IntPtr)(&ts), (IntPtr)(&devIdx), (IntPtr)(&projPos), (IntPtr)(&projLoopCnt));
+        var seq = Reaper.MIDI_GetRecentInputEvent.Invoke(idx, (IntPtr)buffer, (IntPtr)(&bufferSize), (IntPtr)(&ts), (IntPtr)(&devIdx), (IntPtr)(&projPos), (IntPtr)(&projLoopCnt));
         if (seq == 0) break;
         if (seq <= lastSequence) break;
 

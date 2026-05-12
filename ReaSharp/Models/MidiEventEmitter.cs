@@ -1,4 +1,4 @@
-﻿namespace ReaSharp.Models;
+namespace ReaSharp.Models;
 
 public class MidiEventEmitter
 {
@@ -22,7 +22,7 @@ public class MidiEventEmitter
 
   public MidiEventEmitter Send(MidiEvent evt)
   {
-    Reaper.StuffMIDIMessage(_mode, evt.Status, evt.Data1, evt.Data2);
+    Reaper.StuffMIDIMessage.Invoke(_mode, evt.Status, evt.Data1, evt.Data2);
     return this;
   }
 }
