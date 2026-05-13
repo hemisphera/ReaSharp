@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using ReaSharp.RppXml;
 
 namespace ReaSharp.Models;
 
@@ -119,6 +120,22 @@ public sealed class TrackMediaItem : IArrangeItem
   {
     var handle = Reaper.GetActiveTake.Invoke(ReaperHandle);
     return handle != IntPtr.Zero ? TrackMediaItemTake.FromHandle(handle) : null;
+  }
+
+  public RppNode? GetStateChunk()
+  {
+    var value = Marshal.AllocHGlobal(Reaper.NeedBigBufferSize);
+    try
+    {
+      var content = Reaper.GetItemStateChunk.Invoke(ReaperHandle, value, Reaper.NeedBigBufferSize, false)
+        ? Marshal.PtrToStringAnsi(value)
+        : null;
+      return string.IsNullOrEmpty(content) ? null : RppReader.ReadFromString(content);
+    }
+    finally
+    {
+      Marshal.FreeHGlobal(value);
+    }
   }
 
   public List<TrackMediaItemTake> EnumerateTakes()
