@@ -130,7 +130,7 @@ public sealed class TrackMediaItem : IArrangeItem
       var content = Reaper.GetItemStateChunk.Invoke(ReaperHandle, value, Reaper.NeedBigBufferSize, false)
         ? Marshal.PtrToStringAnsi(value)
         : null;
-      return string.IsNullOrEmpty(content) ? null : RppReader.ReadFromString(content);
+      return string.IsNullOrEmpty(content) ? null : RppReader.Read(content);
     }
     finally
     {

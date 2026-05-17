@@ -22,6 +22,9 @@ public class RppNode : IRppEntry
   /// </summary>
   public List<IRppEntry> Entries { get; } = [];
 
+  /// <summary>The parent node, or <see langword="null"/> for the root.</summary>
+  public RppNode? Parent { get; internal set; }
+
   /// <summary>
   /// When <see langword="true"/> this node was opened implicitly (no <c>&lt;NAME</c> header
   /// line) as defined by <see cref="RppSchema.ImplicitChildNodeStarters"/>.

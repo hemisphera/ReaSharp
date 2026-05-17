@@ -1,22 +1,30 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace ReaSharp.RppXml;
 
 /// <summary>Parses an RPPXML text stream into an <see cref="RppNode"/> tree.</summary>
 public sealed class RppReader
 {
+  public static bool TryRead(string content, [NotNullWhen(true)] out RppNode? node)
+  {
+    node = null;
+    try
+    {
+      node = Read(content);
+      return true;
+    }
+    catch
+    {
+      return false;
+    }
+  }
+
   /// <summary>Parses RPPXML from a string.</summary>
-  public static RppNode ReadFromString(string content)
+  public static RppNode Read(string content)
   {
     using var sr = new StringReader(content);
     return Read(sr);
   }
-
-  /// <summary>Parses RPPXML from a file.</summary>
-  public static RppNode ReadFromFile(string path)
-  {
-    using var sr = new StreamReader(path);
-    return Read(sr);
-  }
-
 
   /// <summary>Parses RPPXML from any <see cref="TextReader"/>.</summary>
   public static RppNode Read(TextReader reader)
@@ -24,8 +32,7 @@ public sealed class RppReader
     var stack = new Stack<RppNode>();
     RppNode? root = null;
 
-    string? line;
-    while ((line = reader.ReadLine()) != null)
+    while (reader.ReadLine() is { } line)
     {
       var trimmed = line.TrimStart();
       if (trimmed.Length == 0) continue;
@@ -39,9 +46,15 @@ public sealed class RppReader
         node.DefaultValues.AddRange(headerValues);
 
         if (stack.Count > 0)
-          stack.Peek().Entries.Add(node);
+        {
+          var parent = stack.Peek();
+          node.Parent = parent;
+          parent.Entries.Add(node);
+        }
         else
+        {
           root = node;
+        }
 
         stack.Push(node);
         continue;
@@ -98,7 +111,7 @@ public sealed class RppReader
         : top.Name;
 
       if (RppSchema.ImplicitChildNodeStarters.TryGetValue(enclosingName, out var starters)
-          && starters.Contains(propName))
+          && starters.TryGetValue(propName, out var implicitNodeName))
       {
         // Close previous implicit sibling (if any), then open a new one
         if (top.IsImplicit)
@@ -107,7 +120,12 @@ public sealed class RppReader
           top = stack.Peek();
         }
 
-        var implicitNode = new RppNode(propName) { IsImplicit = true };
+        // Use the configured node name; fall back to the starter property name.
+        var effectiveName = string.IsNullOrEmpty(implicitNodeName) ? propName : implicitNodeName;
+        var implicitNode = RppSchema.NodeFactory(effectiveName);
+        implicitNode.Name = effectiveName;
+        implicitNode.IsImplicit = true;
+        implicitNode.Parent = top;
         implicitNode.Entries.Add(new RppProperty(propName, propValues));
         top.Entries.Add(implicitNode);
         stack.Push(implicitNode);

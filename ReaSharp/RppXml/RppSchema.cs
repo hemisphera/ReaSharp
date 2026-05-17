@@ -8,17 +8,23 @@ public static class RppSchema
 {
   // ── Implicit child-node starters (spec point 11) ───────────────────────
   //
-  // Maps parent node names (case-insensitive) to the set of property names
-  // (case-insensitive) that implicitly start a new child node inside that
-  // parent, rather than being plain properties of the parent.
+  // Maps parent node names (case-insensitive) to an inner dictionary that
+  // maps each starter property name (case-insensitive) to the logical node
+  // name that should be used for the implicitly created child node.
+  // When the mapped node name is null or empty the starter property name is
+  // used as the node name instead.
   //
   // Add or remove entries here as additional patterns are discovered.
-  // Example: inside FXCHAIN every FX begins with "BYPASS" instead of "<NAME".
+  // Example: inside FXCHAIN every FX begins with property "BYPASS" and the
+  // implicit child node should be called "FX".
 
-  public static readonly Dictionary<string, HashSet<string>> ImplicitChildNodeStarters =
+  public static readonly Dictionary<string, Dictionary<string, string>> ImplicitChildNodeStarters =
     new(StringComparer.OrdinalIgnoreCase)
     {
-      ["FXCHAIN"] = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "BYPASS" }
+      ["FXCHAIN"] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+      {
+        ["BYPASS"] = "FX"
+      }
     };
 
   // ── Node factory ───────────────────────────────────────────────────────
