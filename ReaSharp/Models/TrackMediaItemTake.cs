@@ -18,15 +18,17 @@ public sealed class TrackMediaItemTake : ReaperObject
     set => SetStringValue("P_NAME", value);
   }
 
-  public override IntPtr ReaperHandle { get; }
+  public override nint ReaperHandle { get; }
 
   public int MidiEventCount
   {
     get
     {
-      int noteCount, ccCount, sysExCount;
       unsafe
       {
+        int sysExCount;
+        int ccCount;
+        int noteCount;
         return Reaper.MIDI_CountEvts.Invoke(ReaperHandle, (nint)(&noteCount), (nint)(&ccCount), (nint)(&sysExCount));
       }
     }
