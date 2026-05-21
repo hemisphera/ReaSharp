@@ -13,7 +13,8 @@ public sealed class GmemService : IGmemService
   private IntPtr _gmem;
 
   public string? ConnectedName { get; private set; }
-  public bool IsConnected => _gmem != IntPtr.Zero;
+  public bool IsConnected => _gmem != nint.Zero;
+
 
   public void Connect(string name, bool isAlloc = true)
   {
@@ -30,16 +31,28 @@ public sealed class GmemService : IGmemService
       Marshal.FreeHGlobal(namePtr);
     }
 
-    if (_gmem == IntPtr.Zero)
+    if (_gmem == nint.Zero)
       throw new Exception($"Unable to attach to gmem '{name}'.");
 
     ConnectedName = name;
   }
 
-  public double Read(int index)
+  public void Disconnect()
   {
     EnsureConnected();
-    EnsureIndex(index);
+    ConnectedName = null;
+    _gmem = nint.Zero;
+  }
+
+  public double Read(int index)
+  {
+    var buf = new double[1];
+    return Read(index, buf) ? buf[0] : 0.0;
+  }
+
+  public bool Read(int index, double[] buffer)
+  {
+    EnsureConnected();
 
     Reaper.NSEEL_HOSTSTUB_EnterMutex.Invoke();
     try
@@ -47,10 +60,18 @@ public sealed class GmemService : IGmemService
       unsafe
       {
         var blocks = *(double***)_gmem;
-        if (blocks == null) return 0.0;
-        var block = blocks[index >> ItemsPerBlockLog2];
-        return block == null ? 0.0 : block[index & ItemMask];
+        if (blocks == null) return false;
+
+        for (var i = 0; i < buffer.Length; i++)
+        {
+          var actualIndex = index + i;
+          EnsureIndex(actualIndex);
+          var block = blocks[actualIndex >> ItemsPerBlockLog2];
+          buffer[i] = block == null ? 0.0 : block[actualIndex & ItemMask];
+        }
       }
+
+      return true;
     }
     finally
     {
@@ -60,19 +81,29 @@ public sealed class GmemService : IGmemService
 
   public void Write(int index, double value)
   {
+    Write(index, [value]);
+  }
+
+  public void Write(int index, IEnumerable<double> buffer)
+  {
     EnsureConnected();
-    EnsureIndex(index);
 
     Reaper.NSEEL_HOSTSTUB_EnterMutex.Invoke();
     try
     {
+      var bufferArray = buffer.ToArray();
       unsafe
       {
         var blocks = *(double***)_gmem;
         if (blocks == null) throw new Exception("gmem block table is not available.");
-        var block = blocks[index >> ItemsPerBlockLog2];
-        if (block == null) throw new Exception($"gmem block for index {index} is not allocated.");
-        block[index & ItemMask] = value;
+        for (var i = 0; i < bufferArray.Length; i++)
+        {
+          var actualIndex = index + i;
+          EnsureIndex(actualIndex);
+          var block = blocks[actualIndex >> ItemsPerBlockLog2];
+          if (block == null) throw new Exception($"gmem block for index {actualIndex} is not allocated.");
+          block[actualIndex & ItemMask] = bufferArray[i];
+        }
       }
     }
     finally
@@ -89,7 +120,7 @@ public sealed class GmemService : IGmemService
 
   private static void EnsureIndex(int index)
   {
-    if (index < 0 || index >= MaxNamedSlots)
+    if (index is < 0 or >= MaxNamedSlots)
       throw new ArgumentOutOfRangeException(nameof(index), index, $"Index must be in range 0..{MaxNamedSlots - 1}.");
   }
 }
