@@ -23,7 +23,7 @@ public sealed class MidiListener : IDisposable
       {
         await Task.Delay(PollFrequency, token);
 
-        var events = ReaperApi.GetRecentMidiEvents(seq);
+        var events = ReaperGlobal.GetRecentMidiEvents(seq);
         foreach (var midiEvent in events)
         {
           MidiCallback.Invoke(midiEvent);

@@ -15,7 +15,7 @@ public class Project : ReaperObject
     try
     {
       var prj = Reaper.EnumProjects.Invoke(index, filename, bufSize);
-      if (prj == IntPtr.Zero) return null;
+      if (prj == nint.Zero) return null;
       return new Project(prj)
       {
         Index = index,
@@ -55,6 +55,23 @@ public class Project : ReaperObject
 
   public string? Filename { get; init; }
 
+  public string? RecordingPath
+  {
+    get
+    {
+      const int bufSize = 4096;
+      var path = Marshal.AllocHGlobal(bufSize);
+      try
+      {
+        Reaper.GetProjectPathEx.Invoke(ReaperHandle, path, bufSize);
+        return Marshal.PtrToStringAnsi(path);
+      }
+      finally
+      {
+        Marshal.FreeHGlobal(path);
+      }
+    }
+  }
 
   private Project(IntPtr handle)
   {
@@ -119,9 +136,23 @@ public class Project : ReaperObject
     SetSelection(ai.Start, ai.End);
   }
 
-  public List<TrackMediaItem> GetSelectedItems(int? maxCount = null)
+  
+  public List<TrackMediaItem> EnumerateMediaItems()
   {
-    var items = TrackMediaItem.Enumerate(this);
+    var result = new List<TrackMediaItem>();
+    var count = Reaper.CountMediaItems.Invoke(ReaperHandle);
+    for (var i = 0; i < count; i++)
+    {
+      var handle = Reaper.GetMediaItem.Invoke(ReaperHandle, i);
+      result.Add(TrackMediaItem.FromHandle(handle));
+    }
+
+    return result;
+  }
+
+  public List<TrackMediaItem> GetSelectedMediaItems(int? maxCount = null)
+  {
+    var items = EnumerateMediaItems();
     List<TrackMediaItem> result = [];
     foreach (var item in items)
     {
@@ -168,5 +199,36 @@ public class Project : ReaperObject
   public override string ToString()
   {
     return $"{Index}: {Filename}";
+  }
+
+  public Track? GetTrackByNumber(int number)
+  {
+    return GetTracks().FirstOrDefault(t => t.Number == number);
+  }
+
+  public Track? GetTrackByIndex(int index)
+  {
+    return GetTracks().FirstOrDefault(t => t.Index == index);
+  }
+
+  public void InsertMedia(byte[] contents, string name)
+  {
+    var recordingPath = RecordingPath ?? throw new InvalidOperationException("Recording path is not set.");
+    var filePath = Path.Combine(recordingPath, name);
+    File.WriteAllBytes(filePath, contents);
+    InsertMedia(filePath);
+  }
+
+  public void InsertMedia(string path)
+  {
+    var str = Marshal.StringToHGlobalAnsi(path);
+    try
+    {
+      Reaper.InsertMedia.Invoke(str, 0);
+    }
+    finally
+    {
+      Marshal.FreeHGlobal(str);
+    }
   }
 }

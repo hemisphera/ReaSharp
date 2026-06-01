@@ -15,33 +15,6 @@ public sealed class TrackMediaItem : IArrangeItem
     return FromHandle(Reaper.GetTrackMediaItem.Invoke(track.ReaperHandle, index));
   }
 
-  public static List<TrackMediaItem> Enumerate(Track track)
-  {
-    var result = new List<TrackMediaItem>();
-    var count = Reaper.CountTrackMediaItems.Invoke(track.ReaperHandle);
-    for (var i = 0; i < count; i++)
-    {
-      var handle = Reaper.GetTrackMediaItem.Invoke(track.ReaperHandle, i);
-      result.Add(FromHandle(handle));
-    }
-
-    return result;
-  }
-
-  public static List<TrackMediaItem> Enumerate(Project? project = null)
-  {
-    project ??= Project.Default;
-    var result = new List<TrackMediaItem>();
-    var count = Reaper.CountMediaItems.Invoke(project.ReaperHandle);
-    for (var i = 0; i < count; i++)
-    {
-      var handle = Reaper.GetMediaItem.Invoke(project.ReaperHandle, i);
-      result.Add(FromHandle(handle));
-    }
-
-    return result;
-  }
-
 
   public Track Track => Track.FromHandle(Reaper.GetMediaItemTrack.Invoke(ReaperHandle));
 
@@ -153,7 +126,7 @@ public sealed class TrackMediaItem : IArrangeItem
 
   public void SelectExclusive()
   {
-    var selectedItems = Enumerate(Track.Project).Where(i => i.Selected).ToList();
+    var selectedItems = Track.Project.EnumerateMediaItems().Where(i => i.Selected).ToList();
     foreach (var item in selectedItems)
     {
       item.Selected = false;

@@ -1,9 +1,10 @@
 using System.Runtime.InteropServices;
 using ReaSharp.Models;
+using ReaSharp.Utils;
 
 namespace ReaSharp;
 
-public static class ReaperApi
+public static class ReaperGlobal
 {
   public static List<MidiEvent> GetRecentMidiEvents(int? lastSequence = null, int? maxEvents = null)
   {
@@ -46,5 +47,19 @@ public static class ReaperApi
     }
 
     return result;
+  }
+
+  public static string? GetResourcePath()
+  {
+    var ptr = Reaper.GetResourcePath.Invoke();
+    return Marshal.PtrToStringAnsi(ptr);
+  }
+
+  public static IniFile? ReadSettings()
+  {
+    var resourcePath = GetResourcePath();
+    if (string.IsNullOrEmpty(resourcePath)) return null;
+    var settingsPath = Path.Combine(resourcePath, "reaper.ini");
+    return IniFile.Load(settingsPath);
   }
 }

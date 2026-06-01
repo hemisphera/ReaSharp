@@ -31,7 +31,14 @@ public sealed class Track : ReaperObject
 
   public override IntPtr ReaperHandle { get; }
   public Project Project => Project.FromHandle((IntPtr)GetValue("P_PROJECT"));
-  public int Index { get; }
+
+  /// <summary>
+  /// 1-based track index 
+  /// </summary>
+  public int Index => Number - 1;
+
+  public int Number { get; }
+
   public Guid Id { get; }
 
   public string Name
@@ -94,7 +101,7 @@ public sealed class Track : ReaperObject
   private Track(IntPtr trackHandle)
   {
     ReaperHandle = trackHandle;
-    Index = (int)GetValue("IP_TRACKNUMBER");
+    Number = (int)GetValue("IP_TRACKNUMBER");
     Id = Guid.TryParse(GetStringValue("GUID"), out var guid) ? guid : Guid.Empty;
   }
 
@@ -169,7 +176,7 @@ public sealed class Track : ReaperObject
     var itemCount = Reaper.CountTrackMediaItems.Invoke(ReaperHandle);
     return Enumerable.Range(0, itemCount).Select(i => TrackMediaItem.FromByTrackIndex(this, i));
   }
-
+  
   public IEnumerable<FxInstance> EnumerateFx()
   {
     return FxInstance.EnumerateFromTrack(this);
@@ -210,7 +217,7 @@ public sealed class Track : ReaperObject
 
   public List<TrackMediaItem> GetSelectedItems(int? maxCount = null)
   {
-    var items = TrackMediaItem.Enumerate(this);
+    var items = EnumerateMediaItems();
     List<TrackMediaItem> result = [];
     foreach (var item in items)
     {
