@@ -24,41 +24,37 @@ public class DefaultCommandRegistry : ICommandRegistry
   /// <param name="uniqueName">Stable, unique identifier for this command (e.g. "ReaSharp_MyAction"). Must not change between sessions.</param>
   /// <param name="description">Label shown in the REAPER Action List.</param>
   /// <param name="handler">Callback invoked when the command is triggered.</param>
-  public ReaperCommand Register(string uniqueName, string description, Func<IServiceProvider, Task> handler)
+  public ReaperCommand Register(string uniqueName, string description, Func<IServiceProvider, ActionContext, Task> handler)
   {
-    // Step 1: register the named command ID — return value IS the assigned command ID.
+    // Register via custom_action so the command is fully discoverable by NamedCommandLookup,
+    // which is required for OSC /action/str to work. command_id alone does not populate
+    // the named-command lookup table that REAPER's OSC subsystem uses.
     var uniqueNamePtr = Marshal.StringToHGlobalAnsi(uniqueName);
     PinnedAllocations.Add(uniqueNamePtr); // must remain alive
-    var cmdIdName = Marshal.StringToHGlobalAnsi("command_id");
-    var commandId = Reaper.Register(cmdIdName, uniqueNamePtr);
-    Marshal.FreeHGlobal(cmdIdName);
+    var descPtr = Marshal.StringToHGlobalAnsi(description);
+    PinnedAllocations.Add(descPtr);
+
+    // The struct must remain alive — REAPER holds the pointer.
+    var structPtr = Marshal.AllocHGlobal(Marshal.SizeOf<CustomActionRegister>());
+    PinnedAllocations.Add(structPtr);
+
+    var reg = new CustomActionRegister
+    {
+      UniqueSectionId = 0, // 0 = Main section
+      IdStr = uniqueNamePtr,
+      Name = descPtr,
+      Extra = IntPtr.Zero
+    };
+    Marshal.StructureToPtr(reg, structPtr, false);
+
+    var caName = Marshal.StringToHGlobalAnsi("custom_action");
+    var commandId = Reaper.Register(caName, structPtr);
+    Marshal.FreeHGlobal(caName);
 
     _logger.LogDebug("Registered command ID {commandId}", commandId);
 
     if (commandId == 0)
       throw new Exception($"REAPER returned command ID 0 for '{uniqueName}'. Check that the name is unique.");
-
-    // Step 2: register a gaccel_register_t so the command appears in the Action List.
-    var descPtr = Marshal.StringToHGlobalAnsi(description);
-    PinnedAllocations.Add(descPtr);
-
-    // The struct must remain alive — REAPER holds the pointer.
-    var structPtr = Marshal.AllocHGlobal(Marshal.SizeOf<GaccelRegister>());
-    PinnedAllocations.Add(structPtr);
-
-    var reg = new GaccelRegister
-    {
-      Accel = new Accel { fVirt = 0, key = 0, cmd = (ushort)commandId },
-      Desc = descPtr
-    };
-    Marshal.StructureToPtr(reg, structPtr, false);
-
-    var regName = Marshal.StringToHGlobalAnsi("gaccel");
-    var gaccelResult = Reaper.Register(regName, structPtr);
-    Marshal.FreeHGlobal(regName);
-
-    if (gaccelResult == 0)
-      throw new Exception($"REAPER rejected gaccel registration for '{uniqueName}'.");
 
     var command = new ReaperCommand
     {
