@@ -76,8 +76,7 @@ public class PluginState
       SectionId = section.UniqueId,
       Val = val,
       Val2 = val2,
-      RelMode = relMode,
-      Hwnd = hwnd
+      RelMode = relMode
     };
 
     cmd.Execute(Instance.Services, context);

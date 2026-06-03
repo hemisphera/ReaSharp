@@ -12,25 +12,28 @@ namespace ReaSharp.Models;
 ///   - MIDI pitch/OSC: val2 >= 0, OSC float = (val2 | (val &lt;&lt; 7)) / 16383.0
 ///   - relmode:        0=absolute, 1/2/3=relative adjust modes
 /// </remarks>
-public struct ActionContext
+public class ActionContext
 {
   /// <summary>Section unique ID (0=main, 100=main alt, 32060=MIDI editor, etc.).</summary>
-  public int SectionId;
+  public int SectionId { get; init; }
 
   /// <summary>For MIDI CC/OSC: value component [0..127].</summary>
-  public int Val;
+  public int Val { get; init; }
 
   /// <summary>For MIDI CC: -1. For MIDI pitch or OSC: &gt;=0.</summary>
-  public int Val2;
+  public int Val2 { get; init; }
 
   /// <summary>Relative mode: 0=absolute, 1/2/3=relative adjust.</summary>
-  public int RelMode;
+  public int RelMode { get; init; }
+
+  public double DoubleValue => (Val2 | (Val << 7)) / 16383.0;
+
+  public int IntValue => Val == 0 && Val2 == 0 ? 0 : 16384 - ((Val << 7) | Val2);
 
   /// <summary>HWND of the section window. Zero for MIDI/OSC triggers.</summary>
-  public IntPtr Hwnd;
-
+  //public IntPtr Hwnd;
   public override string ToString()
   {
-    return $"Val: {Val}, Val2: {Val2}, RelMode:{RelMode}";
+    return $"Val: {Val}, Val2: {Val2}, RelMode:{RelMode}, DoubleValue: {DoubleValue}, IntValue: {IntValue}";
   }
 }
