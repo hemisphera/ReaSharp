@@ -12,10 +12,10 @@ public sealed class ReaperCommand
   /// <summary>Human-readable description shown in the REAPER Action List.</summary>
   public required string Description { get; init; }
 
-  public required Func<IServiceProvider, Task> Handler { get; init; }
+  public required Func<IServiceProvider, ActionContext, Task> Handler { get; init; }
 
 
-  public void Execute(IServiceProvider services)
+  public void Execute(IServiceProvider services, ActionContext context)
   {
     _ = Task.Run(async () =>
     {
@@ -23,7 +23,7 @@ public sealed class ReaperCommand
       var logger = scope.ServiceProvider.GetService<ILogger<ReaperCommand>>();
       try
       {
-        await Handler(scope.ServiceProvider);
+        await Handler(scope.ServiceProvider, context);
       }
       catch (Exception exception)
       {
