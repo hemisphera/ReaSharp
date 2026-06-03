@@ -149,7 +149,7 @@ public sealed class RppReader
   /// Tokenises a single line, treating quoted strings as atomic tokens.
   /// Raw tokens are returned exactly as they appear (quotes included).
   /// </summary>
-  internal static List<string> Tokenize(string line)
+  internal static List<string> Tokenize(string line, bool unquote = false)
   {
     var tokens = new List<string>();
     var i = 0;
@@ -191,7 +191,9 @@ public sealed class RppReader
       }
     }
 
-    return tokens;
+    return unquote
+      ? tokens.Select(t => t.StartsWith('"') && t.EndsWith('"') ? t.Substring(1, t.Length - 2) : t).ToList()
+      : tokens;
   }
 
   private static RppNode PeekAt(Stack<RppNode> stack, int depth)

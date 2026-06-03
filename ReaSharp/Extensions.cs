@@ -8,4 +8,10 @@ public static class Extensions
       sp.TotalSeconds >= item.Start.TotalSeconds &&
       sp.TotalSeconds <= item.End.TotalSeconds;
   }
+
+  public static string TryGet(this IList<string> tokens, int index)
+  {
+    if (index < 0 || index >= tokens.Count) return string.Empty;
+    return tokens[index];
+  }
 }

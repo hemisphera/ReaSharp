@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using ReaSharp.Models;
+using ReaSharp.SettingsModels;
 using ReaSharp.Utils;
 
 namespace ReaSharp;
@@ -55,11 +56,30 @@ public static class ReaperGlobal
     return Marshal.PtrToStringAnsi(ptr);
   }
 
-  public static IniFile? ReadSettings()
+  public static IniFile? ReadSettings(string? settingsFilePath = null)
   {
-    var resourcePath = GetResourcePath();
-    if (string.IsNullOrEmpty(resourcePath)) return null;
-    var settingsPath = Path.Combine(resourcePath, "reaper.ini");
-    return IniFile.Load(settingsPath);
+    if (settingsFilePath == null)
+    {
+      var resourcePath = GetResourcePath();
+      if (string.IsNullOrEmpty(resourcePath)) return null;
+      settingsFilePath = Path.Combine(resourcePath, "reaper.ini");
+    }
+    return IniFile.Load(settingsFilePath);
+  }
+
+  public static IEnumerable<OscDevice> EnumerateOscDevices(string? settingsFilePath = null)
+  {
+    var section = ReadSettings(settingsFilePath)?["reaper"];
+    if (section == null) return [];
+    section.TryGetInt("csurf_cnt", out var surfaceCount);
+    List<OscDevice> devices = []; 
+    for (var i = 0; i < surfaceCount; i++)
+    {
+      var line = section["csurf_" + i];
+      var dev = OscDevice.Parse(line);
+      if (dev != null) devices.Add(dev);
+    }
+
+    return devices;
   }
 }
