@@ -56,7 +56,7 @@ public sealed class Track : ReaperObject
   public bool RecordArm
   {
     get => (int)GetValue("I_RECARM") != 0;
-    set => SetValue("I_RECARM ", value ? 1.0 : 0.0);
+    set => SetValue("I_RECARM ", value ? 1 : 0);
   }
 
   public RecordingMode RecordingMode
@@ -244,7 +244,7 @@ public sealed class Track : ReaperObject
     var ptr = Marshal.AllocHGlobal(bufferSize);
     try
     {
-      return Reaper.GetTrackStateChunk.Invoke(ReaperHandle, ptr, Reaper.NeedBigBufferSize, false)
+      return Reaper.GetTrackStateChunk.Invoke(ReaperHandle, ptr, bufferSize, false)
         ? Marshal.PtrToStringAnsi(ptr)
         : null;
     }
