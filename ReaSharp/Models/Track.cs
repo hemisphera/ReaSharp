@@ -53,10 +53,16 @@ public sealed class Track : ReaperObject
     set => SetValue("B_MUTE", value ? 1.0 : 0.0);
   }
 
+  public bool RecordArm
+  {
+    get => (int)GetValue("I_RECARM") != 0;
+    set => SetValue("I_RECARM ", value ? 1.0 : 0.0);
+  }
+
   public RecordingMode RecordingMode
   {
     get => (RecordingMode)GetValue("I_RECMODE");
-    set => SetValue("I_RECMODE", (int)RecordingMode);
+    set => SetValue("I_RECMODE", (int)value);
   }
 
   public TrackSoloState Solo
@@ -176,7 +182,7 @@ public sealed class Track : ReaperObject
     var itemCount = Reaper.CountTrackMediaItems.Invoke(ReaperHandle);
     return Enumerable.Range(0, itemCount).Select(i => TrackMediaItem.FromByTrackIndex(this, i));
   }
-  
+
   public IEnumerable<FxInstance> EnumerateFx()
   {
     return FxInstance.EnumerateFromTrack(this);

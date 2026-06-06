@@ -9,9 +9,9 @@ public static class Extensions
       sp.TotalSeconds <= item.End.TotalSeconds;
   }
 
-  public static string TryGet(this IList<string> tokens, int index)
+  public static T? TryGet<T>(this IList<T> tokens, int index)
   {
-    if (index < 0 || index >= tokens.Count) return string.Empty;
+    if (index < 0 || index >= tokens.Count) return default;
     return tokens[index];
   }
 }
