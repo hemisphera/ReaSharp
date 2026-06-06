@@ -60,6 +60,13 @@ public sealed class FxInstanceParameter
     return GetValueInternal().value;
   }
 
+  public double GetValueNormalized()
+  {
+    return FxInstance.Track != null
+      ? Reaper.TrackFX_GetParamNormalized.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index)
+      : Reaper.TakeFX_GetParamNormalized.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index);
+  }
+
   private (double min, double max, double value) GetValueInternal()
   {
     double minVal = 0, maxVal = 0;
