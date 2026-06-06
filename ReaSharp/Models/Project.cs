@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using ReaSharp.RppXml;
 
 namespace ReaSharp.Models;
 
@@ -73,6 +74,37 @@ public class Project : ReaperObject
     }
   }
 
+  public string? Notes
+  {
+    get
+    {
+      const int bufferSize = 4 * 4096;
+      var buffer = Marshal.AllocHGlobal(bufferSize);
+      try
+      {
+        Reaper.GetSetProjectNotes.Invoke(ReaperHandle, false, buffer, bufferSize);
+        return Marshal.PtrToStringAnsi(buffer);
+      }
+      finally
+      {
+        Marshal.FreeHGlobal(buffer);
+      }
+    }
+    set
+    {
+      const int bufferSize = 4 * 4096;
+      var buffer = Marshal.StringToHGlobalAnsi(value);
+      try
+      {
+        Reaper.GetSetProjectNotes.Invoke(ReaperHandle, true, buffer, bufferSize);
+      }
+      finally
+      {
+        Marshal.FreeHGlobal(buffer);
+      }
+    }
+  }
+
   private Project(IntPtr handle)
   {
     ReaperHandle = handle;
@@ -136,7 +168,7 @@ public class Project : ReaperObject
     SetSelection(ai.Start, ai.End);
   }
 
-  
+
   public List<TrackMediaItem> EnumerateMediaItems()
   {
     var result = new List<TrackMediaItem>();
