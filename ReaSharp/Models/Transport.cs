@@ -51,6 +51,11 @@ public class Transport
     FireEvents(wasRecording, wasPlaying);
   }
 
+  public TimeSignature GetTimeSignature(TimeSpan? time = null)
+  {
+    return TimeSignature.Get(this);
+  }
+
   public void ToggleRecord()
   {
     Reaper.Main_OnCommandEx.Invoke(1013, 0, Project.ReaperHandle);
@@ -92,6 +97,12 @@ public class Transport
   public void ToggleRecordAtNextMeasure()
   {
     Reaper.Main_OnCommandEx.Invoke(40003, 0, Project.ReaperHandle);
+  }
+
+  public double TimeToQuarterNotes(TimeSpan? time = null)
+  {
+    time ??= PlayheadOrCursorPosition;
+    return Reaper.TimeMap2_timeToQN.Invoke(Project.ReaperHandle, time.Value.TotalSeconds);
   }
 
   public void ToggleRecordAtNextBeat()
