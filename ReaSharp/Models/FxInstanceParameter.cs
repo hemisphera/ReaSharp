@@ -35,6 +35,12 @@ public sealed class FxInstanceParameter
   public double LargeStepSize { get; }
   public bool IsToggle { get; }
 
+  public double NormalizedValue
+  {
+    get => GetValueNormalized();
+    set => SetValueNormalized(value);
+  }
+
 
   public static FxInstanceParameter FromTrackFx(FxInstance fxInstance, int parameterIndex)
   {
@@ -60,11 +66,18 @@ public sealed class FxInstanceParameter
     return GetValueInternal().value;
   }
 
-  public double GetValueNormalized()
+  private double GetValueNormalized()
   {
     return FxInstance.Track != null
       ? Reaper.TrackFX_GetParamNormalized.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index)
       : Reaper.TakeFX_GetParamNormalized.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index);
+  }
+
+  private bool SetValueNormalized(double value)
+  {
+    return FxInstance.Track != null
+      ? Reaper.TrackFX_SetParamNormalized.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, value)
+      : Reaper.TakeFX_SetParamNormalized.Invoke(FxInstance.Owner.ReaperHandle, FxInstance.Index, Index, value);
   }
 
   private (double min, double max, double value) GetValueInternal()
