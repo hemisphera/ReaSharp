@@ -9,8 +9,11 @@ public sealed class MidiEvent
   public byte Data1 { get; set; }
   public byte Data2 { get; set; }
 
+  public byte Channel => (byte)(Status & 0x0F);
+  public byte Message => (byte)(Status >> 4);
+
   public override string ToString()
   {
-    return $"{Sequence}: {Status} {Data1} {Data2}";
+    return $"{Sequence}: {Channel} {Message} {Data1} {Data2}";
   }
 }

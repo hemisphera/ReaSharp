@@ -6,14 +6,13 @@ public sealed class MidiListener : IDisposable
 {
   private readonly CancellationTokenSource _cts;
 
-  public Action<MidiEvent> MidiCallback { get; }
+  public event EventHandler<MidiEvent>? MidiReceived;
 
-  public TimeSpan PollFrequency { get; set; } = TimeSpan.FromSeconds(1);
+  public TimeSpan PollFrequency { get; set; } = TimeSpan.FromMilliseconds(50);
 
 
-  public MidiListener(Action<MidiEvent> midiCallback)
+  public MidiListener()
   {
-    MidiCallback = midiCallback;
     _cts = new CancellationTokenSource();
     var token = _cts.Token;
     Task.Run(async () =>
@@ -26,7 +25,7 @@ public sealed class MidiListener : IDisposable
         var events = ReaperGlobal.GetRecentMidiEvents(seq);
         foreach (var midiEvent in events)
         {
-          MidiCallback.Invoke(midiEvent);
+          MidiReceived?.Invoke(this, midiEvent);
           if (seq == null || seq < midiEvent.Sequence)
           {
             seq = midiEvent.Sequence;
