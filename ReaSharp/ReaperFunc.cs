@@ -13,7 +13,6 @@ namespace ReaSharp;
 public struct ReaperFunc<T> where T : Delegate
 {
   private readonly string[] _names;
-  private T? _delegate;
 
   public ReaperFunc(params string[] names) => _names = names;
 
@@ -22,18 +21,17 @@ public struct ReaperFunc<T> where T : Delegate
   {
     get
     {
-      if (_delegate is not null) return _delegate;
+      if (field is not null) return field;
       foreach (var name in _names)
       {
         var ptr = Marshal.StringToHGlobalAnsi(name);
         var funcPtr = Reaper.GetFunc(ptr);
         Marshal.FreeHGlobal(ptr);
-        if (funcPtr != IntPtr.Zero)
-          return _delegate = Marshal.GetDelegateForFunctionPointer<T>(funcPtr);
+        if (funcPtr != nint.Zero)
+          return field = Marshal.GetDelegateForFunctionPointer<T>(funcPtr);
       }
 
-      throw new NotSupportedException(
-        $"REAPER function '{string.Join(" / ", _names)}' is not available in this version.");
+      throw new NotSupportedException($"REAPER function '{string.Join(" / ", _names)}' is not available in this version.");
     }
   }
 

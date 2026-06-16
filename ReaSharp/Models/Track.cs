@@ -104,7 +104,7 @@ public sealed class Track : ReaperObject
   public int MediaItemCount => Reaper.CountTrackMediaItems.Invoke(ReaperHandle);
 
 
-  private Track(IntPtr trackHandle)
+  private Track(nint trackHandle)
   {
     ReaperHandle = trackHandle;
     Number = (int)GetValue("IP_TRACKNUMBER");
@@ -150,7 +150,6 @@ public sealed class Track : ReaperObject
     try
     {
       var value = Reaper.GetMediaTrackInfo_Value.Invoke(ReaperHandle, ptr);
-      //ReaperLogger.LogDebug($"Read '{paramName}': '{value}'.");
       return value;
     }
     finally
@@ -164,7 +163,6 @@ public sealed class Track : ReaperObject
     var ptr = Marshal.StringToHGlobalAnsi(paramName);
     try
     {
-      //ReaperLogger.LogDebug($"Setting '{paramName}' to '{newValue}'.");
       if (!Reaper.SetMediaTrackInfo_Value.Invoke(ReaperHandle, ptr, newValue))
       {
         throw new Exception($"Unable to set value '{newValue}' for '{paramName}'.");
@@ -203,7 +201,6 @@ public sealed class Track : ReaperObject
   public TrackMediaItem CreateEmptyItem(TimeSpan? position = null, TimeSpan? length = null)
   {
     var handle = Reaper.AddMediaItemToTrack.Invoke(ReaperHandle);
-    //ReaperLogger.LogDebug($"Created media item {handle}");
     var item = TrackMediaItem.FromHandle(handle);
     item.Start = position ?? TimeSpan.FromSeconds(0);
     item.Length = length ?? TimeSpan.FromSeconds(1);

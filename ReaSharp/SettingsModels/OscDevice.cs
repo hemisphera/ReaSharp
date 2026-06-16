@@ -10,17 +10,17 @@ public class OscDevice
     if (tokens.TryGet(0) != "OSC") return null;
     return new OscDevice
     {
-      Name = tokens.TryGet(1),
+      Name = tokens.TryGet(1) ?? string.Empty,
       Mode = int.TryParse(tokens.TryGet(2), out var mode) ? mode : 0,
       ReaperPort = int.TryParse(tokens.TryGet(3), out var reaperPort) ? reaperPort : 0,
-      DeviceIp = tokens.TryGet(4),
+      DeviceIp = tokens.TryGet(4) ?? string.Empty,
       DevicePort = int.TryParse(tokens.TryGet(5), out var devicePort) ? devicePort : 0,
       MaxPacketSize = int.TryParse(tokens.TryGet(6), out var maxPacketSize) ? maxPacketSize : 0,
       WaitTime = int.TryParse(tokens.TryGet(7), out var waitTime) ? waitTime : 0,
-      Definition = tokens.TryGet(8)
+      Definition = tokens.TryGet(8) ?? string.Empty
     };
   }
-  
+
   public string Name { get; set; } = string.Empty;
   public int Mode { get; set; }
   public int ReaperPort { get; set; }

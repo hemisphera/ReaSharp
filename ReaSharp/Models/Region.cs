@@ -10,8 +10,8 @@ public sealed class Region : IArrangeItem
   public TimeSpan Start { get; init; }
   public TimeSpan End { get; init; }
   public TimeSpan Duration => End - Start;
-  
-  
+
+
   public static IEnumerable<Region> Enumerate(Project? project = null)
   {
     project ??= Project.Default;
@@ -63,10 +63,5 @@ public sealed class Region : IArrangeItem
   public override string ToString()
   {
     return $"{Id}: {Name} [{Start} - {End}]";
-  }
-
-  public bool IsActive(TimeSpan position)
-  {
-    return Start <= position && End >= position;
   }
 }
