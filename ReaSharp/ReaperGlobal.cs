@@ -23,24 +23,22 @@ public static class ReaperGlobal
         double projPos = -1;
         var projLoopCnt = 0;
 
-        var seq = Reaper.MIDI_GetRecentInputEvent.Invoke(idx, (IntPtr)buffer, (IntPtr)(&bufferSize), (IntPtr)(&ts), (IntPtr)(&devIdx), (IntPtr)(&projPos), (IntPtr)(&projLoopCnt));
+        var seq = Reaper.MIDI_GetRecentInputEvent.Invoke(idx, (nint)buffer, (nint)(&bufferSize), (nint)(&ts), (nint)(&devIdx), (nint)(&projPos), (nint)(&projLoopCnt));
         if (seq == 0) break;
         if (seq <= lastSequence) break;
 
         if (bufferSize < 1)
           continue;
 
-        var status = buffer[0];
-        var data1 = bufferSize > 1 ? buffer[1] : (byte)0;
-        var data2 = bufferSize > 2 ? buffer[2] : (byte)0;
-
-        var mevent = new MidiEvent
+        var bufferArray = new byte[bufferSize];
+        for (var i = 0; i < bufferSize; i++)
         {
-          BufferSize = bufferSize,
+          bufferArray[i] = buffer[i];
+        }
+
+        var mevent = new MidiEvent(bufferArray)
+        {
           Sequence = seq,
-          Status = status,
-          Data1 = data1,
-          Data2 = data2,
           DeviceIndex = devIdx & 0xFFFF
         };
         result.Add(mevent);
@@ -64,6 +62,7 @@ public static class ReaperGlobal
       if (string.IsNullOrEmpty(resourcePath)) return null;
       settingsFilePath = Path.Combine(resourcePath, "reaper.ini");
     }
+
     return IniFile.Load(settingsFilePath);
   }
 
@@ -72,7 +71,7 @@ public static class ReaperGlobal
     var section = ReadSettings(settingsFilePath)?["reaper"];
     if (section == null) return [];
     section.TryGetInt("csurf_cnt", out var surfaceCount);
-    List<OscDevice> devices = []; 
+    List<OscDevice> devices = [];
     for (var i = 0; i < surfaceCount; i++)
     {
       var line = section["csurf_" + i];
