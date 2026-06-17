@@ -25,6 +25,46 @@ public class FxInstance
 
   public int Index { get; }
 
+  public bool Offline
+  {
+    get
+    {
+      if (Track != null)
+        return Reaper.TrackFX_GetOffline.Invoke(Owner.ReaperHandle, Index);
+      if (Take != null)
+        return Reaper.TakeFX_GetOffline.Invoke(Owner.ReaperHandle, Index);
+      return false;
+    }
+    set
+    {
+      if (Offline == value) return;
+      if (Track != null)
+        Reaper.TrackFX_SetOffline.Invoke(Owner.ReaperHandle, Index, value);
+      if (Take != null)
+        Reaper.TakeFX_SetOffline.Invoke(Owner.ReaperHandle, Index, value);
+    }
+  }
+
+  public bool Bypass
+  {
+    get
+    {
+      if (Track != null)
+        return Reaper.TrackFX_GetEnabled.Invoke(Owner.ReaperHandle, Index);
+      if (Take != null)
+        return Reaper.TakeFX_GetEnabled.Invoke(Owner.ReaperHandle, Index);
+      return false;
+    }
+    set
+    {
+      if (Bypass == value) return;
+      if (Track != null)
+        Reaper.TrackFX_SetEnabled.Invoke(Owner.ReaperHandle, Index, value);
+      if (Take != null)
+        Reaper.TakeFX_SetEnabled.Invoke(Owner.ReaperHandle, Index, value);
+    }
+  }
+
 
   public static List<FxInstance> EnumerateFromTrack(Track track)
   {

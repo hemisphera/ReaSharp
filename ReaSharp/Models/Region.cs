@@ -25,7 +25,7 @@ public sealed class Region : IArrangeItem
         var isRegion = 0;
         var pos = 0.0;
         var end = 0.0;
-        var namePtr = IntPtr.Zero;
+        var namePtr = nint.Zero;
         var markOrRegionIndex = 0;
         var color = 0;
 
