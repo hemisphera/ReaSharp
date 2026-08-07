@@ -18,7 +18,8 @@ public sealed class MidiListener : IDisposable
     Task.Run(async () =>
     {
       int? seq = null;
-      while (!token.IsCancellationRequested)
+      using var pt = new PeriodicTimer(PollFrequency);
+      while (await pt.WaitForNextTickAsync(token))
       {
         var events = ReaperGlobal.GetRecentMidiEvents(seq);
         foreach (var midiEvent in events)
@@ -29,8 +30,6 @@ public sealed class MidiListener : IDisposable
             seq = midiEvent.Sequence;
           }
         }
-
-        await Task.Delay(PollFrequency, token);
       }
     });
   }
