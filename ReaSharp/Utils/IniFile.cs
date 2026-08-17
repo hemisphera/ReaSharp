@@ -16,7 +16,7 @@ public sealed class IniFile : IEnumerable<IniSection>
 
   public static IniFile Load(string filePath)
   {
-    using var stream = File.OpenRead(filePath);
+    using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
     return Load(stream);
   }
 
