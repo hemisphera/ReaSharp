@@ -1,0 +1,124 @@
+using System.Runtime.InteropServices;
+using Hsp.ReaSharp.Models;
+using Microsoft.Extensions.Logging;
+
+namespace Hsp.ReaSharp;
+
+public class DefaultCommandRegistry : ICommandRegistry
+{
+  private readonly ILogger<DefaultCommandRegistry> _logger;
+  private static readonly Dictionary<int, ReaperCommand> Commands = [];
+
+  // Unmanaged memory that must outlive the plugin — never freed.
+  private static readonly List<IntPtr> PinnedAllocations = [];
+
+  public DefaultCommandRegistry(ILogger<DefaultCommandRegistry> logger)
+  {
+    _logger = logger;
+  }
+
+  /// <summary>
+  /// Registers a command with REAPER and returns the resulting <see cref="ReaperCommand"/>
+  /// whose <see cref="ReaperCommand.Id"/> is assigned by REAPER.
+  /// </summary>
+  /// <param name="uniqueName">Stable, unique identifier for this command (e.g. "ReaSharp_MyAction"). Must not change between sessions.</param>
+  /// <param name="description">Label shown in the REAPER Action List.</param>
+  /// <param name="handler">Callback invoked when the command is triggered.</param>
+  public ReaperCommand Register(string uniqueName, string description, Func<IServiceProvider, ActionContext, Task> handler)
+  {
+    // Register via custom_action so the command is fully discoverable by NamedCommandLookup,
+    // which is required for OSC /action/str to work. command_id alone does not populate
+    // the named-command lookup table that REAPER's OSC subsystem uses.
+    var uniqueNamePtr = Marshal.StringToHGlobalAnsi(uniqueName);
+    PinnedAllocations.Add(uniqueNamePtr); // must remain alive
+    var descPtr = Marshal.StringToHGlobalAnsi(description);
+    PinnedAllocations.Add(descPtr);
+
+    // The struct must remain alive — REAPER holds the pointer.
+    var structPtr = Marshal.AllocHGlobal(Marshal.SizeOf<CustomActionRegister>());
+    PinnedAllocations.Add(structPtr);
+
+    var reg = new CustomActionRegister
+    {
+      UniqueSectionId = 0, // 0 = Main section
+      IdStr = uniqueNamePtr,
+      Name = descPtr,
+      Extra = IntPtr.Zero
+    };
+    Marshal.StructureToPtr(reg, structPtr, false);
+
+    var caName = Marshal.StringToHGlobalAnsi("custom_action");
+    var commandId = Reaper.Register(caName, structPtr);
+    Marshal.FreeHGlobal(caName);
+
+    _logger.LogDebug("Registered command ID {commandId}", commandId);
+
+    if (commandId == 0)
+      throw new Exception($"REAPER returned command ID 0 for '{uniqueName}'. Check that the name is unique.");
+
+    var command = new ReaperCommand
+    {
+      Id = commandId,
+      Description = description,
+      Handler = handler
+    };
+
+    Commands[commandId] = command;
+    return command;
+  }
+
+  public ReaperCommand? GetById(int command)
+  {
+    return Commands.GetValueOrDefault(command);
+  }
+
+  /*
+  public static async Task RunTest1()
+  {
+    var sw = Stopwatch.StartNew();
+    var tracks = Track.Enumerate().ToList();
+    sw.Stop();
+    ReaperLogger.LogDebug($"Enumerate tracks: {sw.Elapsed.TotalMilliseconds}ms");
+
+    var lastTrack = tracks.Last();
+
+    sw = Stopwatch.StartNew();
+    var isMuted = lastTrack.Mute;
+    sw.Stop();
+    ReaperLogger.LogDebug($"Reading mute: {sw.Elapsed.TotalMilliseconds}ms");
+
+    sw = Stopwatch.StartNew();
+    lastTrack.Mute = !isMuted;
+    ReaperLogger.LogDebug($"Toggle mute: {sw.Elapsed.TotalMilliseconds}ms");
+
+    sw = Stopwatch.StartNew();
+    lastTrack.Mute = !isMuted;
+    ReaperLogger.LogDebug($"Toggle same mute: {sw.Elapsed.TotalMilliseconds}ms");
+
+    sw = Stopwatch.StartNew();
+    foreach (var track in tracks)
+    {
+      track.Mute = true;
+    }
+
+    ReaperLogger.LogDebug($"Toggle mute on all: {sw.Elapsed.TotalMilliseconds}ms");
+  }
+
+  public static async Task RunTest2()
+  {
+    var tracks = Track.Enumerate();
+    int level = 0;
+    foreach (var track in tracks)
+    {
+      var msg = "".PadLeft(level) + track.Name;
+      level += track.FolderLevel;
+
+      ReaperLogger.Log(msg);
+      foreach (var item in track.EnumerateMediaItems())
+      {
+        ReaperLogger.Log($"{item.Index}");
+      }
+    }
+  }
+  */
+}

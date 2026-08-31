@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <AssemblyName>reaper_reasharp</AssemblyName>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PublishAot>true</PublishAot>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!-- Required: tells the AOT linker to produce a true native shared library (DLL)
+             with a proper export table. Without this, [UnmanagedCallersOnly] exports
+             will NOT appear in the PE export table and LoadLibrary/GetProcAddress won't work. -->
+        <NativeLib>Shared</NativeLib>
+        <PackageId>Hsp.ReaSharp</PackageId>
+        <Title>Hsp.ReaSharp</Title>
+        <Authors>Hemisphera</Authors>
+        <Description>Enables writing plugins for Cockos REAPER in .NET using AOT</Description>
+        <PackageProjectUrl>https://github.com/hemisphera/ReaSharp</PackageProjectUrl>
+        <PackageIcon>reaper-logo.png</PackageIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\reaper-logo.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+        <Link>reaper-logo.png</Link>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Hsp.ReaSharp.RppXml\Hsp.ReaSharp.RppXml.csproj" />
+    </ItemGroup>
+
+</Project>
