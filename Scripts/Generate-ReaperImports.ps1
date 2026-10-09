@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
   [string]$ApiUrl = 'https://www.reaper.fm/sdk/reascript/reascripthelp.html',
-  [string]$ReaperFile = (Join-Path $PSScriptRoot '..\ReaSharp\Reaper.cs')
+  [string]$ReaperFile = (Join-Path $PSScriptRoot '..\Hsp.ReaSharp\Reaper.cs')
 )
 
 Set-StrictMode -Version Latest
