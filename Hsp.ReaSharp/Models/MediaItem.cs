@@ -3,9 +3,9 @@ using Hsp.ReaSharp.RppXml;
 
 namespace Hsp.ReaSharp.Models;
 
-public sealed class MediaItem : IArrangeItem
+public sealed class MediaItem : ILengthArrangeItem
 {
-  public static MediaItem FromHandle(IntPtr handle)
+  public static MediaItem FromHandle(nint handle)
   {
     return new MediaItem(handle);
   }
@@ -44,10 +44,10 @@ public sealed class MediaItem : IArrangeItem
     set => SetValue("B_LOOPSRC", value ? 1 : 0);
   }
 
-  public IntPtr ReaperHandle { get; }
+  public nint ReaperHandle { get; }
 
 
-  private MediaItem(IntPtr handle)
+  private MediaItem(nint handle)
   {
     ReaperHandle = handle;
   }
@@ -92,7 +92,7 @@ public sealed class MediaItem : IArrangeItem
   public MediaItemTake? GetActiveTake()
   {
     var handle = Reaper.GetActiveTake.Invoke(ReaperHandle);
-    return handle != IntPtr.Zero ? MediaItemTake.FromHandle(handle) : null;
+    return handle != nint.Zero ? MediaItemTake.FromHandle(handle) : null;
   }
 
   public RppNode? GetStateChunk()

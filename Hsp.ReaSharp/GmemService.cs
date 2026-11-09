@@ -10,7 +10,7 @@ public sealed class GmemService : IGmemService
   private const int ItemMask = ItemsPerBlock - 1;
   private const int MaxNamedSlots = NamedGmemBlocks * ItemsPerBlock;
 
-  private IntPtr _gmem;
+  private nint _gmem;
 
   public string? ConnectedName { get; private set; }
   public bool IsConnected => _gmem != nint.Zero;

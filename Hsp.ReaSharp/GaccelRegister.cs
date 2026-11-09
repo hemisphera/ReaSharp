@@ -7,5 +7,5 @@ namespace Hsp.ReaSharp;
 public struct GaccelRegister
 {
   public Accel Accel;
-  public IntPtr Desc; // const char* — ANSI description shown in the Action List
+  public nint Desc; // const char* — ANSI description shown in the Action List
 }

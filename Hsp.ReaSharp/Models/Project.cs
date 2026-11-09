@@ -4,7 +4,7 @@ namespace Hsp.ReaSharp.Models;
 
 public class Project : ReaperObject
 {
-  public static readonly Project Default = new(IntPtr.Zero);
+  public static readonly Project Default = new(nint.Zero);
   public static Project Current => GetProjectByIndex(-1) ?? throw new Exception("Unable to get current project");
   public static Project? CurrentlyRendering => GetProjectByIndex(0x40000000);
 
@@ -28,7 +28,7 @@ public class Project : ReaperObject
     }
   }
 
-  public static Project FromHandle(IntPtr handle)
+  public static Project FromHandle(nint handle)
   {
     return new Project(handle);
   }
@@ -48,8 +48,9 @@ public class Project : ReaperObject
     return projects;
   }
 
+  
 
-  public override IntPtr ReaperHandle { get; }
+  public override nint ReaperHandle { get; }
 
   public int Index { get; init; } = -1;
 
@@ -104,7 +105,7 @@ public class Project : ReaperObject
     }
   }
 
-  private Project(IntPtr handle)
+  private Project(nint handle)
   {
     ReaperHandle = handle;
   }
@@ -158,11 +159,11 @@ public class Project : ReaperObject
     {
       var startVal = start.TotalSeconds;
       var endVal = end.TotalSeconds;
-      Reaper.GetSet_LoopTimeRange2.Invoke(ReaperHandle, true, false, (IntPtr)(&startVal), (IntPtr)(&endVal), false);
+      Reaper.GetSet_LoopTimeRange2.Invoke(ReaperHandle, true, false, (nint)(&startVal), (nint)(&endVal), false);
     }
   }
 
-  public void SetSelection(IArrangeItem ai)
+  public void SetSelection(ILengthArrangeItem ai)
   {
     SetSelection(ai.Start, ai.End);
   }
@@ -220,7 +221,7 @@ public class Project : ReaperObject
     Marshal.FreeHGlobal(str);
   }
 
-  public void ZoomTo(IArrangeItem item)
+  public void ZoomTo(ILengthArrangeItem item)
   {
     SetSelection(item);
     ZoomToTimeSelection();

@@ -11,7 +11,7 @@ namespace Hsp.ReaSharp;
 public struct CustomActionRegister
 {
   public int UniqueSectionId; // 0/100=main/main alt, 32060=MIDI editor, etc.
-  public IntPtr IdStr; // const char* — unique name across all sections
-  public IntPtr Name; // const char* — display name in the Action List
-  public IntPtr Extra; // reserved, must be IntPtr.Zero
+  public nint IdStr; // const char* — unique name across all sections
+  public nint Name; // const char* — display name in the Action List
+  public nint Extra; // reserved, must be nint.Zero
 }

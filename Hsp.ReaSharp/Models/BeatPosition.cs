@@ -14,7 +14,7 @@ public struct BeatPosition : IComparable<BeatPosition>, IEquatable<BeatPosition>
     {
       project ??= Project.Default;
       var measure = Measure;
-      var time = Reaper.TimeMap2_beatsToTime.Invoke(project.ReaperHandle, Beats, (IntPtr)(&measure));
+      var time = Reaper.TimeMap2_beatsToTime.Invoke(project.ReaperHandle, Beats, (nint)(&measure));
       return TimeSpan.FromSeconds(time);
     }
   }
@@ -30,7 +30,7 @@ public struct BeatPosition : IComparable<BeatPosition>, IEquatable<BeatPosition>
       var denominator = 0;
       var beats = Reaper.TimeMap2_timeToBeats.Invoke(
         project.ReaperHandle, time.TotalSeconds,
-        (IntPtr)(&measure), (IntPtr)(&measureLength), (IntPtr)(&totalBeats), (IntPtr)(&denominator)
+        (nint)(&measure), (nint)(&measureLength), (nint)(&totalBeats), (nint)(&denominator)
       );
       beats = Math.Round(beats, 5);
       totalBeats = Math.Round(totalBeats, 5);

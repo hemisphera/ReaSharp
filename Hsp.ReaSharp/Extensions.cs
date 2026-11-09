@@ -2,7 +2,7 @@
 
 public static class Extensions
 {
-  public static bool IsWithin(this TimeSpan sp, IArrangeItem item)
+  public static bool IsWithin(this TimeSpan sp, ILengthArrangeItem item)
   {
     return
       sp.TotalSeconds >= item.Start.TotalSeconds &&

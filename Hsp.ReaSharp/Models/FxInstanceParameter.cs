@@ -126,6 +126,6 @@ public sealed class FxInstanceParameter
   {
     if (FxInstance.Track == null) return null;
     var ptr = Reaper.GetFXEnvelope.Invoke(FxInstance.Track.ReaperHandle, FxInstance.Index, Index, allowCreate);
-    return ptr == IntPtr.Zero ? null : TrackFxEnvelope.FromHandle(ptr);
+    return ptr == nint.Zero ? null : TrackFxEnvelope.FromHandle(ptr);
   }
 }

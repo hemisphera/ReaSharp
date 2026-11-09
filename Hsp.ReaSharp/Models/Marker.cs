@@ -6,7 +6,7 @@ public sealed class Marker
 {
   public required int Id { get; init; }
   public required string Name { get; init; }
-  public TimeSpan Position { get; init; }
+  public TimeSpan Start { get; init; }
 
   public static IEnumerable<Marker> Enumerate(Project? project = null)
   {
@@ -21,19 +21,19 @@ public sealed class Marker
         var isRegion = 0;
         var pos = 0.0;
         var end = 0.0;
-        var namePtr = IntPtr.Zero;
+        var namePtr = nint.Zero;
         var markOrRegionIndex = 0;
         var color = 0;
 
         var result = Reaper.EnumProjectMarkers3.Invoke(
           project.ReaperHandle,
           idx,
-          (IntPtr)(&isRegion),
-          (IntPtr)(&pos),
-          (IntPtr)(&end),
-          (IntPtr)(&namePtr),
-          (IntPtr)(&markOrRegionIndex),
-          (IntPtr)(&color));
+          (nint)(&isRegion),
+          (nint)(&pos),
+          (nint)(&end),
+          (nint)(&namePtr),
+          (nint)(&markOrRegionIndex),
+          (nint)(&color));
 
         if (result == 0) break;
 
@@ -43,7 +43,7 @@ public sealed class Marker
           {
             Id = markOrRegionIndex,
             Name = Marshal.PtrToStringAnsi(namePtr) ?? string.Empty,
-            Position = TimeSpan.FromSeconds(pos)
+            Start = TimeSpan.FromSeconds(pos)
           });
         }
 
@@ -56,6 +56,6 @@ public sealed class Marker
 
   public override string ToString()
   {
-    return $"{Id}: {Name} [{Position}]";
+    return $"{Id}: {Name} [{Start}]";
   }
 }

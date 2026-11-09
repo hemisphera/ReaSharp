@@ -5,7 +5,7 @@ namespace Hsp.ReaSharp.Models;
 public class TrackFxEnvelope : ReaperObject
 {
   public FxInstanceParameter InstanceParameter { get; }
-  public override IntPtr ReaperHandle { get; }
+  public override nint ReaperHandle { get; }
 
   public Track Track { get; }
 
@@ -78,8 +78,8 @@ public class TrackFxEnvelope : ReaperObject
     unsafe
     {
       Reaper.Envelope_Evaluate.Invoke(
-        ReaperHandle, pos.TotalSeconds, 0, 0, (IntPtr)(&value),
-        IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+        ReaperHandle, pos.TotalSeconds, 0, 0, (nint)(&value),
+        nint.Zero, nint.Zero, nint.Zero);
     }
 
     return value;

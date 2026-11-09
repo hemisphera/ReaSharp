@@ -10,7 +10,7 @@ public class DefaultCommandRegistry : ICommandRegistry
   private static readonly Dictionary<int, ReaperCommand> Commands = [];
 
   // Unmanaged memory that must outlive the plugin — never freed.
-  private static readonly List<IntPtr> PinnedAllocations = [];
+  private static readonly List<nint> PinnedAllocations = [];
 
   public DefaultCommandRegistry(ILogger<DefaultCommandRegistry> logger)
   {
@@ -43,7 +43,7 @@ public class DefaultCommandRegistry : ICommandRegistry
       UniqueSectionId = 0, // 0 = Main section
       IdStr = uniqueNamePtr,
       Name = descPtr,
-      Extra = IntPtr.Zero
+      Extra = nint.Zero
     };
     Marshal.StructureToPtr(reg, structPtr, false);
 

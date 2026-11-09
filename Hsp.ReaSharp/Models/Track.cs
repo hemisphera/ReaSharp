@@ -23,14 +23,14 @@ public sealed class Track : ReaperObject
     return FromHandle(handle);
   }
 
-  public static Track FromHandle(IntPtr handle)
+  public static Track FromHandle(nint handle)
   {
     return new Track(handle);
   }
 
 
-  public override IntPtr ReaperHandle { get; }
-  public Project Project => Project.FromHandle((IntPtr)GetValue("P_PROJECT"));
+  public override nint ReaperHandle { get; }
+  public Project Project => Project.FromHandle((nint)GetValue("P_PROJECT"));
 
   /// <summary>
   /// 1-based track index 
@@ -214,7 +214,7 @@ public sealed class Track : ReaperObject
     var handle = Reaper.CreateNewMIDIItemInProj.Invoke(
       ReaperHandle,
       position.Value.TotalSeconds, (position + length).Value.TotalSeconds,
-      IntPtr.Zero);
+      nint.Zero);
     return MediaItem.FromHandle(handle);
   }
 

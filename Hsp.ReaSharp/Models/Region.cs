@@ -32,12 +32,12 @@ public sealed class Region : IArrangeItem
         var result = Reaper.EnumProjectMarkers3.Invoke(
           project.ReaperHandle,
           idx,
-          (IntPtr)(&isRegion),
-          (IntPtr)(&pos),
-          (IntPtr)(&end),
-          (IntPtr)(&namePtr),
-          (IntPtr)(&markOrRegionIndex),
-          (IntPtr)(&color));
+          (nint)(&isRegion),
+          (nint)(&pos),
+          (nint)(&end),
+          (nint)(&namePtr),
+          (nint)(&markOrRegionIndex),
+          (nint)(&color));
 
         if (result == 0) break;
 

@@ -4,9 +4,9 @@ namespace Hsp.ReaSharp.Models;
 
 public sealed class MediaItemTake : ReaperObject
 {
-  public static MediaItemTake FromHandle(IntPtr handle)
+  public static MediaItemTake FromHandle(nint handle)
   {
-    return handle == IntPtr.Zero
+    return handle == nint.Zero
       ? throw new ArgumentException("Handle cannot be zero.", nameof(handle))
       : new MediaItemTake(handle);
   }
@@ -35,7 +35,7 @@ public sealed class MediaItemTake : ReaperObject
   }
 
 
-  private MediaItemTake(IntPtr handle)
+  private MediaItemTake(nint handle)
   {
     ReaperHandle = handle;
   }
@@ -60,7 +60,7 @@ public sealed class MediaItemTake : ReaperObject
   private void SetStringValue(string paramName, string? value)
   {
     var ptr = Marshal.StringToHGlobalAnsi(paramName);
-    var ptrValue = string.IsNullOrEmpty(value) ? IntPtr.Zero : Marshal.StringToHGlobalAnsi(value);
+    var ptrValue = string.IsNullOrEmpty(value) ? nint.Zero : Marshal.StringToHGlobalAnsi(value);
     try
     {
       Reaper.GetSetMediaItemTakeInfo_String.Invoke(ReaperHandle, ptr, ptrValue, true);
@@ -80,7 +80,7 @@ public sealed class MediaItemTake : ReaperObject
       fixed (byte* ptr = buffer)
       {
         var bufferSize = buffer.Length;
-        var ok = Reaper.MIDI_GetAllEvts.Invoke(ReaperHandle, (IntPtr)ptr, (IntPtr)(&bufferSize));
+        var ok = Reaper.MIDI_GetAllEvts.Invoke(ReaperHandle, (nint)ptr, (nint)(&bufferSize));
         return ok ? buffer[..bufferSize] : null;
       }
     }
@@ -99,19 +99,19 @@ public sealed class MediaItemTake : ReaperObject
 
   public void AddMidiEvent()
   {
-    Reaper.MIDI_InsertNote.Invoke(ReaperHandle, false, false, 0, 10, 1, 100, 100, IntPtr.Zero);
+    Reaper.MIDI_InsertNote.Invoke(ReaperHandle, false, false, 0, 10, 1, 100, 100, nint.Zero);
   }
 
   public MediaItemSource? GetSource()
   {
     var handle = Reaper.GetMediaItemTake_Source.Invoke(ReaperHandle);
-    return handle == IntPtr.Zero ? null : new MediaItemSource(handle);
+    return handle == nint.Zero ? null : new MediaItemSource(handle);
   }
 
   public void SetSource(MediaItemSource? src)
   {
     var oldSource = GetSource();
-    Reaper.SetMediaItemTake_Source.Invoke(ReaperHandle, src?.ReaperHandle ?? IntPtr.Zero);
+    Reaper.SetMediaItemTake_Source.Invoke(ReaperHandle, src?.ReaperHandle ?? nint.Zero);
     if (oldSource != null)
     {
       Marshal.FreeHGlobal(oldSource.ReaperHandle);

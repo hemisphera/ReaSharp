@@ -29,7 +29,7 @@ public class ActionContext
   public int IntValue => Val == 0 && Val2 == 0 ? 0 : 16384 - ((Val << 7) | Val2);
 
   /// <summary>HWND of the section window. Zero for MIDI/OSC triggers.</summary>
-  //public IntPtr Hwnd;
+  //public nint Hwnd;
   public override string ToString()
   {
     return $"Val: {Val}, Val2: {Val2}, RelMode:{RelMode}, DoubleValue: {DoubleValue}, IntValue: {IntValue}";

@@ -44,7 +44,7 @@ public class PluginState
     unsafe
     {
       // hookcommand2: bool onAction(KbdSectionInfo *sec, int command, int val, int val2, int relmode, HWND hwnd)
-      var hookPtr = (IntPtr)(delegate* unmanaged[Cdecl]<IntPtr, int, int, int, int, IntPtr, bool>)&HookCommand;
+      var hookPtr = (nint)(delegate* unmanaged[Cdecl]<nint, int, int, int, int, nint, bool>)&HookCommand;
       var hookName = Marshal.StringToHGlobalAnsi("hookcommand2");
       Reaper.Register(hookName, hookPtr);
       Marshal.FreeHGlobal(hookName);
@@ -62,12 +62,12 @@ public class PluginState
   /// <param name="relMode">0=absolute, 1/2/3=relative adjust modes.</param>
   /// <param name="hwnd">Section window handle; zero for MIDI/OSC triggers.</param>
   [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-  private static bool HookCommand(IntPtr sectionPtr, int command, int val, int val2, int relMode, IntPtr hwnd)
+  private static bool HookCommand(nint sectionPtr, int command, int val, int val2, int relMode, nint hwnd)
   {
     var cmd = Instance.Commands?.GetById(command);
     if (cmd == null) return false;
 
-    var section = sectionPtr != IntPtr.Zero
+    var section = sectionPtr != nint.Zero
       ? Marshal.PtrToStructure<Models.KbdSectionInfo>(sectionPtr)
       : default;
 
