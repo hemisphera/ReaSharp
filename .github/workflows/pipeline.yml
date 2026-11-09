@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 10.0.x
+  MAJOR_VERSION: 0
+  MINOR_VERSION: 0
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Get build number
+      id: version
+      env:
+        COUNTER_API_KEY: ${{ secrets.COUNTER_API_KEY }}
+      run: |
+        $headers = @{ 'X-API-Key' = $env:COUNTER_API_KEY }
+        $body = @{ signature = $env:GITHUB_SHA; seed = 1; increment = 1 } | ConvertTo-Json
+        $counter = Invoke-RestMethod -Method Post `
+          -Uri 'https://counters.hemisphera.com/counters/DotNet/reasharp' `
+          -Headers $headers -ContentType 'application/json' -Body $body
+        "version=$( $counter.value.value )" >> "$env:GITHUB_OUTPUT"
+
+    - name: Build
+      run: dotnet build ReaSharp.sln -c Release -p:Version=${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ steps.version.outputs.version }}
+
+    - name: Pack
+      run: >
+        dotnet pack Hsp.ReaSharp/Hsp.ReaSharp.csproj -c Release
+        -p:Version=${{ env.MAJOR_VERSION }}.${{ env.MINOR_VERSION }}.${{ steps.version.outputs.version }}
+        -o artifacts
+
+    - name: Publish to NuGet
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: |
+        Get-ChildItem artifacts -Filter *.nupkg | ForEach-Object {
+          dotnet nuget push $_.FullName `
+            --source https://api.nuget.org/v3/index.json `
+            --api-key $env:NUGET_API_KEY `
+            --skip-duplicate
+        }
