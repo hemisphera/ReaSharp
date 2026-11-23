@@ -29,11 +29,12 @@ jobs:
       id: version
       env:
         COUNTER_API_KEY: ${{ secrets.COUNTER_API_KEY }}
+        REPO_NAME: ${{ github.event.repository.name }}
       run: |
+        $uri = "https://counters.hemisphera.com/counters/github/${env:REPO_NAME}_${{ env.MAJOR_VERSION }}_${{ env.MINOR_VERSION }}"
         $headers = @{ 'X-API-Key' = $env:COUNTER_API_KEY }
         $body = @{ signature = $env:GITHUB_SHA; seed = 1; increment = 1 } | ConvertTo-Json
-        $counter = Invoke-RestMethod -Method Post `
-          -Uri 'https://counters.hemisphera.com/counters/DotNet/reasharp' `
+        $counter = Invoke-RestMethod -Method Post -Uri $uri `
           -Headers $headers -ContentType 'application/json' -Body $body
         "version=$( $counter.value.value )" >> "$env:GITHUB_OUTPUT"
 
