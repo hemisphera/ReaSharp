@@ -47,7 +47,7 @@ function Convert-CTypeToCSharp {
   $normalized = ($normalized -replace '\s+', ' ').Trim().ToLowerInvariant()
 
   if ($pointerCount -gt 0) {
-    return 'IntPtr'
+    return 'nint'
   }
 
   switch ($normalized) {
@@ -67,7 +67,7 @@ function Convert-CTypeToCSharp {
     'size_t' { return 'nuint' }
     'intptr_t' { return 'nint' }
     'uintptr_t' { return 'nuint' }
-    default { return 'IntPtr' }
+    default { return 'nint' }
   }
 }
 
